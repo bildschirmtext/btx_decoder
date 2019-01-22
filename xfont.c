@@ -32,7 +32,9 @@
  */
 
 #include <stdio.h>
+#if 0
 #include <X11/Xlib.h>
+#endif
 #include "font.h"
 #include "attrib.h"
 
@@ -40,15 +42,34 @@ struct btxchar {
    struct btxchar *link;    /* NULL: use this char,  else: use linked char */
    char *raw;               /* pointer to raw font data */
    char bits;               /* depth in case of DRC */
+#if 0
    Pixmap map[4];           /* 0: normal   (index = yd*2+xd) */
+#endif
+
 };                          /* 1: xdouble  */
                             /* 2: ydouble  */
                             /* 3: xydouble */
 
+#if 1
+typedef struct {
+   int red;
+   int green;
+   int blue;
+   int pixel;
+   int flags
+} XColor;
+enum {
+   DoRed = 1,
+   DoGreen = 2,
+   DoBlue = 4,
+};
+#endif
+#if 0
 extern Display  *dpy;
 extern Window   btxwin;
 extern GC       gc;
 extern Colormap cmap;
+#endif
 extern int      scr, btxwidth;
 extern int pixel_size, have_color, visible, fontheight;
 extern char raw_font[];
@@ -62,7 +83,9 @@ static XColor colormap[32+4+24];  /* store pixel value for each colorcell */
 static int cur_fg = -1, cur_bg = -1;
 
 /* local functions */
+#if 0
 static Pixmap createpixmapfromfont();
+#endif
 static xdraw_normal_char(), xdraw_multicolor_char(), make_stipple();
 static rawfont2bitmap();
 
@@ -83,7 +106,10 @@ init_fonts()
       btx_font[n].raw  = raw_font+n*2*FONT_HEIGHT;
       btx_font[n].bits = 1;
       btx_font[n].link = NULL;
+#if 0
       for(i=0; i<4; i++)  btx_font[n].map[i] = NULL;
+#endif
+
    }
    
    /* link chars into '1st supplementary mosaic' (L) set */
@@ -97,15 +123,20 @@ init_fonts()
    btx_font[L*96+0x7f-0x20].link = NULL;
    btx_font[L*96+0x7f-0x20].raw = raw_del;
    btx_font[L*96+0x7f-0x20].bits = 1;
+#if 0
    for(i=0; i<4; i++)  btx_font[L*96+0x7f-0x20].map[i] = NULL;
-   
+#endif
+
    /* initialize DRCS font to all NULL's */
    btx_font[DRCS*96+0].link = btx_font;    /* link 'SPACE' */
    for(n=1; n<96; n++) {
       btx_font[DRCS*96+n].bits = 0;
       btx_font[DRCS*96+n].raw  = NULL;
       btx_font[DRCS*96+n].link = NULL;
+#if 0
       for(i=0; i<4; i++)  btx_font[DRCS*96+n].map[i] = NULL;
+#endif
+
    }
 }
 
@@ -117,7 +148,7 @@ init_fonts()
  * created and cached.
  */
 
-xputc(c, set, x, y, xdouble, ydouble, underline, diacrit, fg, bg)
+void xputc(c, set, x, y, xdouble, ydouble, underline, diacrit, fg, bg)
 int c, set, x, y, xdouble, ydouble, underline, diacrit, fg, bg;
 {
    extern int rows;
@@ -154,8 +185,10 @@ int x, y, xd, yd, ul, fg, bg;
 {
    extern unsigned char *memimage;  /* draw to window or to memory ?? */
    int i, j, z, s, yy, yyy, xxx, size;
+#if 0
    XGCValues gcv;
-   
+#endif
+
    if(fg==TRANSPARENT)  fg = 32+4+y;
    if(bg==TRANSPARENT)  bg = 32+4+y;
 
@@ -180,6 +213,7 @@ int x, y, xd, yd, ul, fg, bg;
 	       set_mem(x*FONT_WIDTH+xxx,
 		       y*fontheight+(fontheight-1)*(yd+1)+yyy, fg);
    }
+#if 0
    else {  /* draw to btx window */
       size = yd*2 + xd;
       /* Pixmap not available in this size, create it */
@@ -236,6 +270,7 @@ int x, y, xd, yd, ul, fg, bg;
 	    y*fontheight*pixel_size+(fontheight-1)*pixel_size*(yd+1),
             FONT_WIDTH*pixel_size*(xd+1), pixel_size*(yd+1) );
    }
+#endif
 }
 
 
@@ -246,8 +281,10 @@ int x, y, xd, yd;
    extern unsigned char *memimage;  /* draw to window or to memory ?? */
    extern int tia;
    int c, i, j, z, s, p, yy, xxx, yyy, colormask, size;
+#if 0
    XGCValues gcv;
-   
+#endif
+
    if(memimage) {
       z=y*fontheight;
       for(yy=0; yy<fontheight; yy++) {
@@ -268,6 +305,7 @@ int x, y, xd, yd;
 	 }
       }
    }
+#if 0
    else {  /* draw to btx window */
       colormask = 0;
       size = yd*2 + xd;
@@ -325,11 +363,13 @@ int x, y, xd, yd;
 	 } /* bits==2 */
       } /* TIA */
    } /* memimage */
+#endif
 }
 
 
 xclearscreen()
 {
+#if 0
    extern int tia, rows;
    int y, bg;
    
@@ -346,12 +386,14 @@ xclearscreen()
       }
       else XClearWindow(dpy, btxwin);
    }
+#endif
 }
 
 
 xscroll(upper, lower, up)
 int upper, lower, up;
 {
+#if 0
    int col, y;
    
    if(visible) {
@@ -379,17 +421,20 @@ int upper, lower, up;
 
       if(!have_color) XSetForeground(dpy, gc, BlackPixel(dpy, scr));
    }
+#endif
 }
 
 
 xcursor(x, y)
 int x, y;
 {
+#if 0
    extern GC cursorgc;
    
    if(visible) XFillRectangle(dpy, btxwin, cursorgc, x*FONT_WIDTH*pixel_size,
 			      y*fontheight*pixel_size,
 			      FONT_WIDTH*pixel_size, fontheight*pixel_size);
+#endif
 }
 
 
@@ -457,6 +502,7 @@ int xzoom, yzoom;
 }
 
 
+#if 0
 /*
  * create and initialize pixmap with font data 'src'.
  * 4 bit (16 color) DRC's are mapped to colormap entries 16-31.
@@ -513,7 +559,7 @@ int xzoom, yzoom, bits;
 
    return pix;
 }
-
+#endif
 
 /*
  * defines the raw bitmap data for a DRC 'c'. If 'c' was in use before,
@@ -531,10 +577,12 @@ char *data;
    
    if(ch->raw)  free(ch->raw);
    for(n=0; n<4; n++)
+#if 0
       if(ch->map[n]) {
 	 XFreePixmap(dpy, ch->map[n]);
 	 ch->map[n] = NULL;
       }
+#endif
 
    if(! (ch->raw = malloc(2*FONT_HEIGHT*bits)) ) {
       perror("XCEPT: no mem for raw DRCS");
@@ -562,10 +610,12 @@ free_DRCS()
 	 btx_font[n].raw = NULL;
       }
       for(i=0; i<4; i++)
+#if 0
          if(btx_font[n].map[i]) {
 	    XFreePixmap(dpy, btx_font[n].map[i]);
 	    btx_font[n].map[i] = NULL;
 	 }
+#endif
       btx_font[n].link = NULL;
       btx_font[n].bits = 0;
    }
@@ -579,6 +629,7 @@ free_font_pixmaps()
 {
    int i, n;
    
+#if 0
    for(n=0; n<6*96; n++)
       if(!btx_font[n].link)
          for(i=0; i<4; i++)
@@ -586,6 +637,7 @@ free_font_pixmaps()
 	       XFreePixmap(dpy, btx_font[n].map[i]);
 	       btx_font[n].map[i] = NULL;
 	    }
+#endif
 }
 
    
@@ -597,6 +649,7 @@ free_font_pixmaps()
  */
 alloc_colors()
 {
+#if 0
    int n;
    unsigned long planemasks[1], pixelvals[16+4+24];
 
@@ -615,6 +668,7 @@ alloc_colors()
       for(n=0; n<16+4+24; n++) colormap[16+n].pixel = pixelvals[n];
    }
    else have_color = 0;
+#endif
 
    store_colors();
 }
@@ -635,6 +689,7 @@ default_colors()   /* page 153 */
  */
 store_colors()
 {
+#if 0
    int n;
 
    if(visible && have_color) {
@@ -646,6 +701,8 @@ store_colors()
       for(n=0; n<4; n++)  XStoreColor(dpy, cmap, colormap+32+n); /* dclut */
       for(n=0; n<24; n++) XStoreColor(dpy, cmap, colormap+32+4+n);
    }
+#endif
+
 }
 
 
@@ -705,7 +762,9 @@ unsigned int index, r, g, b;
    colormap[index].green = g << 12;
    colormap[index].blue  = b << 12;
    colormap[index].flags = DoRed | DoGreen | DoBlue;
+#if 0
    if(visible && have_color) XStoreColor(dpy, cmap, colormap+index);
+#endif
 
    /* if DCLUT contains this color, change DCLUT color too */
    for(i=0; i<4; i++)
@@ -728,7 +787,9 @@ int entry, index;
    colormap[32+entry].green = colormap[index].green;
    colormap[32+entry].blue  = colormap[index].blue;
    colormap[32+entry].flags = colormap[index].flags;
+#if 0
    if(visible && have_color) XStoreColor(dpy, cmap, colormap+32+entry);
+#endif
 }
 
 
@@ -743,5 +804,7 @@ int row, index;
    colormap[32+4+row].green = colormap[index].green;
    colormap[32+4+row].blue  = colormap[index].blue;
    colormap[32+4+row].flags = colormap[index].flags;
+#if 0
    if(visible && have_color) XStoreColor(dpy, cmap, colormap+32+4+row);
-}   
+#endif
+}
