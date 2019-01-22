@@ -1,0 +1,353 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 50;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		CCB5A6AC21F7B09B00016DFA /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = CCB5A6AB21F7B09B00016DFA /* AppDelegate.m */; };
+		CCB5A6AE21F7B09C00016DFA /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CCB5A6AD21F7B09C00016DFA /* Assets.xcassets */; };
+		CCB5A6B121F7B09C00016DFA /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = CCB5A6AF21F7B09C00016DFA /* MainMenu.xib */; };
+		CCB5A6B421F7B09C00016DFA /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = CCB5A6B321F7B09C00016DFA /* main.m */; };
+		CCB5A6C321F7B0CB00016DFA /* rawfont.c in Sources */ = {isa = PBXBuildFile; fileRef = CCB5A6BC21F7B0CB00016DFA /* rawfont.c */; };
+		CCB5A6C421F7B0CB00016DFA /* layer6.c in Sources */ = {isa = PBXBuildFile; fileRef = CCB5A6BD21F7B0CB00016DFA /* layer6.c */; };
+		CCB5A6C521F7B0CB00016DFA /* xfont.c in Sources */ = {isa = PBXBuildFile; fileRef = CCB5A6BE21F7B0CB00016DFA /* xfont.c */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		CCB5A6A721F7B09B00016DFA /* btx_decoder.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = btx_decoder.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		CCB5A6AA21F7B09B00016DFA /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
+		CCB5A6AB21F7B09B00016DFA /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		CCB5A6AD21F7B09C00016DFA /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		CCB5A6B021F7B09C00016DFA /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
+		CCB5A6B221F7B09C00016DFA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		CCB5A6B321F7B09C00016DFA /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		CCB5A6B521F7B09C00016DFA /* btx_decoder.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = btx_decoder.entitlements; sourceTree = "<group>"; };
+		CCB5A6BC21F7B0CB00016DFA /* rawfont.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = rawfont.c; path = ../rawfont.c; sourceTree = "<group>"; };
+		CCB5A6BD21F7B0CB00016DFA /* layer6.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = layer6.c; path = ../layer6.c; sourceTree = "<group>"; };
+		CCB5A6BE21F7B0CB00016DFA /* xfont.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = xfont.c; path = ../xfont.c; sourceTree = "<group>"; };
+		CCB5A6BF21F7B0CB00016DFA /* font.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = font.h; path = ../font.h; sourceTree = "<group>"; };
+		CCB5A6C021F7B0CB00016DFA /* attrib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = attrib.h; path = ../attrib.h; sourceTree = "<group>"; };
+		CCB5A6C121F7B0CB00016DFA /* protocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = protocol.h; path = ../protocol.h; sourceTree = "<group>"; };
+		CCB5A6C221F7B0CB00016DFA /* control.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = control.h; path = ../control.h; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		CCB5A6A421F7B09B00016DFA /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		CCB5A69E21F7B09B00016DFA = {
+			isa = PBXGroup;
+			children = (
+				CCB5A6BB21F7B0C000016DFA /* shared */,
+				CCB5A6A921F7B09B00016DFA /* btx_decoder */,
+				CCB5A6A821F7B09B00016DFA /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		CCB5A6A821F7B09B00016DFA /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				CCB5A6A721F7B09B00016DFA /* btx_decoder.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		CCB5A6A921F7B09B00016DFA /* btx_decoder */ = {
+			isa = PBXGroup;
+			children = (
+				CCB5A6AA21F7B09B00016DFA /* AppDelegate.h */,
+				CCB5A6AB21F7B09B00016DFA /* AppDelegate.m */,
+				CCB5A6AD21F7B09C00016DFA /* Assets.xcassets */,
+				CCB5A6AF21F7B09C00016DFA /* MainMenu.xib */,
+				CCB5A6B221F7B09C00016DFA /* Info.plist */,
+				CCB5A6B321F7B09C00016DFA /* main.m */,
+				CCB5A6B521F7B09C00016DFA /* btx_decoder.entitlements */,
+			);
+			path = btx_decoder;
+			sourceTree = "<group>";
+		};
+		CCB5A6BB21F7B0C000016DFA /* shared */ = {
+			isa = PBXGroup;
+			children = (
+				CCB5A6C021F7B0CB00016DFA /* attrib.h */,
+				CCB5A6C221F7B0CB00016DFA /* control.h */,
+				CCB5A6BF21F7B0CB00016DFA /* font.h */,
+				CCB5A6BD21F7B0CB00016DFA /* layer6.c */,
+				CCB5A6C121F7B0CB00016DFA /* protocol.h */,
+				CCB5A6BC21F7B0CB00016DFA /* rawfont.c */,
+				CCB5A6BE21F7B0CB00016DFA /* xfont.c */,
+			);
+			name = shared;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		CCB5A6A621F7B09B00016DFA /* btx_decoder */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CCB5A6B821F7B09C00016DFA /* Build configuration list for PBXNativeTarget "btx_decoder" */;
+			buildPhases = (
+				CCB5A6A321F7B09B00016DFA /* Sources */,
+				CCB5A6A421F7B09B00016DFA /* Frameworks */,
+				CCB5A6A521F7B09B00016DFA /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = btx_decoder;
+			productName = btx_decoder;
+			productReference = CCB5A6A721F7B09B00016DFA /* btx_decoder.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		CCB5A69F21F7B09B00016DFA /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 1010;
+				ORGANIZATIONNAME = "Michael Steil";
+				TargetAttributes = {
+					CCB5A6A621F7B09B00016DFA = {
+						CreatedOnToolsVersion = 10.1;
+					};
+				};
+			};
+			buildConfigurationList = CCB5A6A221F7B09B00016DFA /* Build configuration list for PBXProject "btx_decoder" */;
+			compatibilityVersion = "Xcode 9.3";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = CCB5A69E21F7B09B00016DFA;
+			productRefGroup = CCB5A6A821F7B09B00016DFA /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				CCB5A6A621F7B09B00016DFA /* btx_decoder */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		CCB5A6A521F7B09B00016DFA /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CCB5A6AE21F7B09C00016DFA /* Assets.xcassets in Resources */,
+				CCB5A6B121F7B09C00016DFA /* MainMenu.xib in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		CCB5A6A321F7B09B00016DFA /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CCB5A6C521F7B0CB00016DFA /* xfont.c in Sources */,
+				CCB5A6C421F7B0CB00016DFA /* layer6.c in Sources */,
+				CCB5A6B421F7B09C00016DFA /* main.m in Sources */,
+				CCB5A6C321F7B0CB00016DFA /* rawfont.c in Sources */,
+				CCB5A6AC21F7B09B00016DFA /* AppDelegate.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		CCB5A6AF21F7B09C00016DFA /* MainMenu.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				CCB5A6B021F7B09C00016DFA /* Base */,
+			);
+			name = MainMenu.xib;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		CCB5A6B621F7B09C00016DFA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		CCB5A6B721F7B09C00016DFA /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		CCB5A6B921F7B09C00016DFA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = btx_decoder/btx_decoder.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = btx_decoder/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.pagetable.btx-decoder";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		CCB5A6BA21F7B09C00016DFA /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = btx_decoder/btx_decoder.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = btx_decoder/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.pagetable.btx-decoder";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		CCB5A6A221F7B09B00016DFA /* Build configuration list for PBXProject "btx_decoder" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CCB5A6B621F7B09C00016DFA /* Debug */,
+				CCB5A6B721F7B09C00016DFA /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		CCB5A6B821F7B09C00016DFA /* Build configuration list for PBXNativeTarget "btx_decoder" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CCB5A6B921F7B09C00016DFA /* Debug */,
+				CCB5A6BA21F7B09C00016DFA /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = CCB5A69F21F7B09B00016DFA /* Project object */;
+}
