@@ -41,7 +41,16 @@
 #include "attrib.h"
 #include "protocol.h"
 
+#if 1
+#include <stdarg.h>
 void log(const char *format, ...);
+void xbtxerror(int perr, const char *format, ...);
+int visible=0, tia=0, reveal=0;
+FILE *textlog=NULL;
+unsigned char *memimage=NULL;
+
+int main(int argc, char **argv) { return 0; }
+#endif
 
 /* exported variables */
 struct screen_cell screen[24][40];   /* information for every character */
@@ -142,6 +151,7 @@ process_BTX_data()
  */
 int layer2getc()
 {
+#if 0
    extern int server_infd;
    unsigned char c;
    int status;
@@ -184,6 +194,9 @@ int layer2getc()
        t.serialmode ? screen[t.cursory-1][t.cursorx-1].bg : t.par_bg, c);
 
    return c;
+#else
+   return 0;
+#endif
 }
 
 
@@ -192,7 +205,9 @@ int layer2getc()
  */
 layer2ungetc()
 {
+#if 0
    read1(0, NULL, -1);
+#endif
    log("<-- character pushed back\n");
 }
 
@@ -598,7 +613,9 @@ static do_US()  /* page 85/86 */
 	 c3 = layer2getc();
 	 if(c3==0x40) {
 	    log("       TFI request\n");
+#if 0
 	    write(server_outfd, TFI_string, 6);
+#endif
 	 }
 	 else {
 	    log("       TFI echo 0x%02x\n", c3);
@@ -633,7 +650,9 @@ static do_US()  /* page 85/86 */
 
       case 0x3e:  /* annex 7.4 */
 	 log("    Telesoftware\n");
+#if 0
 	 do_TSW();
+#endif
 	 break;
 	 
       default:    /* APA active position addressing */
@@ -1791,4 +1810,20 @@ void log(const char *format, ...)
       vfprintf(textlog, format, args);
       fflush(textlog);
    }
+}
+
+void xbtxerror(int perr, const char *format, ...)
+{
+   extern int errno;
+//   extern char *sys_errlist[];
+   static char errstr[200];
+
+   va_list args;
+   va_start(args, format);
+
+   fprintf(stderr, "\nXCEPT: ");
+   vfprintf(stderr, format, args);
+   if(perr) fprintf(stderr, ": %s", sys_errlist[errno]);
+   fprintf(stderr, "\n\n");
+   exit(1);
 }
