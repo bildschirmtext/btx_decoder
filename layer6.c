@@ -36,6 +36,7 @@
 
 #include <stdio.h>
 #include <ctype.h>
+#include <stdlib.h>
 #include "control.h"
 #include "font.h"
 #include "attrib.h"
@@ -194,13 +195,13 @@ static void move_cursor(int cmd, int y, int x)
       case APF:
          if(++t.cursorx > 40)
 	    if(t.wrap) { t.cursorx-=40; down=1; }
-	    else         t.cursorx=40;
+        else       { t.cursorx=40; }
 	 break;
 	 
       case APB:
 	 if(--t.cursorx < 1)
 	    if(t.wrap) { t.cursorx+=40; up=1; }
-	    else         t.cursorx=1;
+        else       { t.cursorx=1; }
 	 break;
 	 
       case APU:  up=1;         break;
@@ -1749,8 +1750,6 @@ void LOG(const char *format, ...)
 void xbtxerror(int perr, const char *format, ...)
 {
    extern int errno;
-//   extern char *sys_errlist[];
-   static char errstr[200];
 
    va_list args;
    va_start(args, format);

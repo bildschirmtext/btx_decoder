@@ -32,11 +32,13 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #if 0
 #include <X11/Xlib.h>
 #endif
 #include "font.h"
 #include "attrib.h"
+#include "xfont.h"
 
 void	 free(void *);
 
@@ -94,8 +96,6 @@ static void make_stipple(char *src, char *dst, int mask);
 static void rawfont2bitmap(char *src, char *dst, int xzoom, int yzoom);
 static void store_colors(void);
 static void init_colormap(void);
-void define_DCLUT(int entry, int index);
-void define_fullrow_bg(int row, int index);
 
 
 /*
@@ -398,8 +398,7 @@ void xclearscreen()
 }
 
 
-void xscroll(upper, lower, up)
-int upper, lower, up;
+void xscroll(int upper, int lower, int up)
 {
 #if 0
    int col, y;
@@ -433,8 +432,7 @@ int upper, lower, up;
 }
 
 
-void xcursor(x, y)
-int x, y;
+void xcursor(int x, int y)
 {
 #if 0
    extern GC cursorgc;
@@ -466,6 +464,7 @@ int mask;
 }
 
 
+#if 0
 /*
  * converts the BTX font (src) to X11 bitmap data (dst).
  * The xzoom and yzoom parameters specify the stretching factor in x and
@@ -508,7 +507,7 @@ int xzoom, yzoom;
          for(i=0; i<=byte; i++)  *dst++ = data[i];
    }
 }
-
+#endif
 
 #if 0
 /*
@@ -575,9 +574,7 @@ int xzoom, yzoom, bits;
  * initialized, since xputc() does this on demand.
  */
 
-void define_raw_DRC(c, data, bits)
-int c, bits;
-char *data;
+void define_raw_DRC(int c, char *data, int bits)
 {
    struct btxchar *ch = btx_font + DRCS*96 + c - 0x20;
    int n;
@@ -760,8 +757,7 @@ static void init_colormap()
 /*
  * define new RGB values for color 'index' in colormap
  */
-void define_color(index, r, g, b)
-unsigned int index, r, g, b;
+void define_color(unsigned int index, unsigned int r, unsigned int g, unsigned int b)
 {
    int i;
    
