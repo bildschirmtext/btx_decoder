@@ -41,6 +41,8 @@
 #include "attrib.h"
 #include "protocol.h"
 
+void log(const char *format, ...);
+
 /* exported variables */
 struct screen_cell screen[24][40];   /* information for every character */
 int rows, fontheight, reachedEOF;    /* 20 rows(12 high) or 24 rows(10 high) */
@@ -72,7 +74,8 @@ static struct {
 /* local functions */
 static default_sets(), primary_control_C0(), do_US();
 static supplementary_control_C1(), do_ESC(), do_CSI(), do_DRCS(), log_DRC();
-static do_DRCS_data(), do_DEFCOLOR(), do_DEFFORMAT(), do_RESET(), set_attr();
+static do_DRCS_data(), do_DEFCOLOR(), do_DEFFORMAT(), do_RESET();
+static void set_attr();
 static output(), redrawc(), updatec(), update_DRCS_display(), clearscreen();
 static scroll();
 void do_TSW();
@@ -1341,7 +1344,7 @@ static do_RESET()  /* reset functions  (page 157) */
  *      set at this position
  */
 
-static set_attr(a, set, col, mode)
+static void set_attr(a, set, col, mode)
 int a, set, col, mode;
 {
    int x, y = t.cursory-1, refresh, mattr = a;
@@ -1776,15 +1779,16 @@ int up;
  * layer 6 debug log routine. (varargs !?!)
  */
 
-log(s, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12)
-char *s;
-int p1, p2 ,p3, p4, p5, p6, p7, p8, p9, p10, p11, p12;
+void log(const char *format, ...)
 {
    extern FILE *textlog;
    extern int visible;
-   
+
+   va_list args;
+   va_start(args, format);
+
    if(textlog && visible) {
-      fprintf(textlog, s, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12);
+      vfprintf(textlog, format, args);
       fflush(textlog);
    }
 }
