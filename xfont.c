@@ -38,6 +38,8 @@
 #include "font.h"
 #include "attrib.h"
 
+void	 free(void *);
+
 struct btxchar {
    struct btxchar *link;    /* NULL: use this char,  else: use linked char */
    char *raw;               /* pointer to raw font data */
@@ -56,7 +58,7 @@ typedef struct {
    int green;
    int blue;
    int pixel;
-   int flags
+   int flags;
 } XColor;
 enum {
    DoRed = 1,
@@ -86,14 +88,21 @@ static int cur_fg = -1, cur_bg = -1;
 #if 0
 static Pixmap createpixmapfromfont();
 #endif
-static xdraw_normal_char(), xdraw_multicolor_char(), make_stipple();
-static rawfont2bitmap();
+static void xdraw_normal_char(struct btxchar *ch, int x, int y, int xd, int yd, int ul, struct btxchar *dia, int fg, int bg);
+static void xdraw_multicolor_char(struct btxchar *ch, int x, int y, int xd, int yd);
+static void make_stipple(char *src, char *dst, int mask);
+static void rawfont2bitmap(char *src, char *dst, int xzoom, int yzoom);
+static void store_colors(void);
+static void init_colormap(void);
+void define_DCLUT(int entry, int index);
+void define_fullrow_bg(int row, int index);
 
 
 /*
  * initialize character sets. No Pixmaps are created.
  */
 
+void
 init_fonts()
 {
    static char raw_del[] = { 0x3f, 0x3f, 0x3f, 0x3f, 0x3f, 0x3f, 0x3f, 0x3f,
@@ -179,7 +188,7 @@ int c, set, x, y, xdouble, ydouble, underline, diacrit, fg, bg;
    memimage[(y)*480*3 + (x)*3 + 1] = colormap[col].green>>8; \
    memimage[(y)*480*3 + (x)*3 + 2] = colormap[col].blue>>8; }
 
-static xdraw_normal_char(ch, x, y, xd, yd, ul, dia, fg, bg)
+static void xdraw_normal_char(ch, x, y, xd, yd, ul, dia, fg, bg)
 struct btxchar *ch, *dia;
 int x, y, xd, yd, ul, fg, bg;
 {
@@ -274,7 +283,7 @@ int x, y, xd, yd, ul, fg, bg;
 }
 
 
-static xdraw_multicolor_char(ch, x, y, xd, yd)
+static void xdraw_multicolor_char(ch, x, y, xd, yd)
 struct btxchar *ch;
 int x, y, xd, yd;
 {
@@ -367,7 +376,7 @@ int x, y, xd, yd;
 }
 
 
-xclearscreen()
+void xclearscreen()
 {
 #if 0
    extern int tia, rows;
@@ -390,7 +399,7 @@ xclearscreen()
 }
 
 
-xscroll(upper, lower, up)
+void xscroll(upper, lower, up)
 int upper, lower, up;
 {
 #if 0
@@ -425,7 +434,7 @@ int upper, lower, up;
 }
 
 
-xcursor(x, y)
+void xcursor(x, y)
 int x, y;
 {
 #if 0
@@ -441,7 +450,7 @@ int x, y;
 /*
  * set bits in dst for each color in src that has a bit set to 1 in mask 
  */
-static make_stipple(src, dst, mask)
+static void make_stipple(src, dst, mask)
 char *src, *dst;
 int mask;
 {
@@ -464,7 +473,7 @@ int mask;
  * y direction. Make sure that you have allocated enough memory at dst !
  */
 
-static rawfont2bitmap(src, dst, xzoom, yzoom)
+static void rawfont2bitmap(src, dst, xzoom, yzoom)
 char *src, *dst;
 int xzoom, yzoom;
 {
@@ -567,12 +576,11 @@ int xzoom, yzoom, bits;
  * initialized, since xputc() does this on demand.
  */
 
-define_raw_DRC(c, data, bits)
+void define_raw_DRC(c, data, bits)
 int c, bits;
 char *data;
 {
    struct btxchar *ch = btx_font + DRCS*96 + c - 0x20;
-   char *malloc();
    int n;
    
    if(ch->raw)  free(ch->raw);
@@ -599,7 +607,7 @@ char *data;
 /*
  * free the current DRCS completely
  */
-free_DRCS()
+void free_DRCS()
 {
    int i, n;
    
@@ -625,7 +633,7 @@ free_DRCS()
 /*
  * free ALL defined font pixmaps (for change of window size).
  */
-free_font_pixmaps()
+void free_font_pixmaps()
 {
    int i, n;
    
@@ -647,7 +655,7 @@ free_font_pixmaps()
  *                               4 read/write  " for DCLUT mapping +
  *    (for better performance)  24 read/write  " for fullrow_bg colors
  */
-alloc_colors()
+void alloc_colors()
 {
 #if 0
    int n;
@@ -677,7 +685,7 @@ alloc_colors()
 /*
  * initialize colormap and STORE colors !
  */
-default_colors()   /* page 153 */
+void default_colors()   /* page 153 */
 {
    init_colormap();
    store_colors();
@@ -687,7 +695,7 @@ default_colors()   /* page 153 */
 /*
  * load X colors with values in colormap (only the read/write cells !)
  */
-store_colors()
+static void store_colors()
 {
 #if 0
    int n;
@@ -709,7 +717,7 @@ store_colors()
 /*
  * initialize colormap entries for clut 0-3, DCLUT + fullrow background
  */
-init_colormap()
+static void init_colormap()
 {
    int n;
 
@@ -753,7 +761,7 @@ init_colormap()
 /*
  * define new RGB values for color 'index' in colormap
  */
-define_color(index, r, g, b)
+void define_color(index, r, g, b)
 unsigned int index, r, g, b;
 {
    int i;
@@ -779,7 +787,7 @@ unsigned int index, r, g, b;
 /*
  * set RGB values for DCLUT color 'entry' to those of color 'index'.
  */
-define_DCLUT(entry, index)
+void define_DCLUT(entry, index)
 int entry, index;
 {
    dclut[entry] = index;
@@ -796,7 +804,7 @@ int entry, index;
 /*
  * set RGB values for fullrow_bg of 'row' to those of color 'index'.
  */
-define_fullrow_bg(row, index)
+void define_fullrow_bg(row, index)
 int row, index;
 {
    fullrow_bg[row] = index;

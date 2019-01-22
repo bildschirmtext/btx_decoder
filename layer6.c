@@ -43,13 +43,11 @@
 
 #if 1
 #include <stdarg.h>
-void log(const char *format, ...);
+void LOG(const char *format, ...);
 void xbtxerror(int perr, const char *format, ...);
 int visible=0, tia=0, reveal=0;
 FILE *textlog=NULL;
 unsigned char *memimage=NULL;
-
-int main(int argc, char **argv) { return 0; }
 #endif
 
 /* exported variables */
@@ -81,18 +79,19 @@ static struct {
 } t, backup;
 
 /* local functions */
-static default_sets(), primary_control_C0(), do_US();
-static supplementary_control_C1(), do_ESC(), do_CSI(), do_DRCS(), log_DRC();
-static do_DRCS_data(), do_DEFCOLOR(), do_DEFFORMAT(), do_RESET();
+static void default_sets(), do_US();
+static int primary_control_C0(), do_CSI();
+static void supplementary_control_C1(), do_ESC(), do_DRCS(), log_DRC();
+static void do_DRCS_data(), do_DEFCOLOR(), do_DEFFORMAT(), do_RESET();
 static void set_attr();
-static output(), redrawc(), updatec(), update_DRCS_display(), clearscreen();
-static scroll();
+static void output(), redrawc(), updatec(), update_DRCS_display(), clearscreen();
+static void scroll();
 void do_TSW();
 
 /*
  * initialize layer6 variables
  */
-init_layer6()
+void init_layer6()
 {
    int y;
    
@@ -131,13 +130,13 @@ process_BTX_data()
       else         set = t.G0123L[ t.leftright[ (c1&0x80) >> 7 ] ];
 
       if( set == SUPP  &&  (c1 & 0x70) == 0x40 ) {   /* diacritical ??? */
-	 log("diacritical mark %d\n", c1 & 0x0f);
+	 LOG("diacritical mark %d\n", c1 & 0x0f);
 	 c2 = layer2getc();
 	 if(c2&0x60) c1 = (c1<<8) | c2;
 	 t.sshift = 0;
       }
 
-      log("OUTPUT 0x%02x '%c'\n", c1&0xff, isprint(c1&0xff) ? c1&0xff : '.');
+      LOG("OUTPUT 0x%02x '%c'\n", c1&0xff, isprint(c1&0xff) ? c1&0xff : '.');
       output(c1);
       t.lastchar = c1;
    }
@@ -174,7 +173,7 @@ int layer2getc()
 	       reachedEOF = 1;
 	    }
 	    if(c <= MAXPROTOCOLSEQ)  serverstatus(c);
-	    log("\nXCEPTD STATUS CODE: %d\n\n", c);
+	    LOG("\nXCEPTD STATUS CODE: %d\n\n", c);
 
 	    if(!reachedEOF && (status = read1(server_infd, &c, 1)) <= 0) {
 	       if(status < 0)  xbtxerror(1, "layer2getc()");
@@ -187,7 +186,7 @@ int layer2getc()
 
    if(reachedEOF)  c = US;
       
-   log("(%c %03x %2d/%2d %2x/%2x) (0x%02x)   ", t.serialmode ? 'S' : 'P',
+   LOG("(%c %03x %2d/%2d %2x/%2x) (0x%02x)   ", t.serialmode ? 'S' : 'P',
        t.serialmode ? screen[t.cursory-1][t.cursorx-1].attr : t.par_attr,
        t.cursory, t.cursorx, 
        t.serialmode ? screen[t.cursory-1][t.cursorx-1].fg : t.par_fg,
@@ -203,19 +202,19 @@ int layer2getc()
 /*
  * unget character 'c'. Only one character of pushback is guaranteed !
  */
-layer2ungetc()
+void layer2ungetc()
 {
 #if 0
    read1(0, NULL, -1);
 #endif
-   log("<-- character pushed back\n");
+   LOG("<-- character pushed back\n");
 }
 
 
 /*
  * initialize default character sets (page 113)
  */
-static default_sets()
+static void default_sets()
 {
    t.G0123L[G0] = PRIM;
    t.G0123L[G1] = SUP2;
@@ -235,7 +234,7 @@ static default_sets()
  * move the cursor, perform automatic wraparound (page 97)
  *                  and implicite scrolling (page 101)
  */
-static move_cursor(cmd, y, x)
+static void move_cursor(cmd, y, x)
 int cmd, y, x;
 {
    int up=0, down=0;
@@ -319,46 +318,46 @@ int c1;
    switch(c1) {
 
       case APB:
-         log("APB active position back\n");
+         LOG("APB active position back\n");
          move_cursor(APB);
          break;
          
       case APF:
-         log("APF active position forward\n");
+         LOG("APF active position forward\n");
          move_cursor(APF);
          break;
 
       case APD:
-         log("APD active position down\n");
+         LOG("APD active position down\n");
          move_cursor(APD);
          break;
 
       case APU:
-         log("APU active position up\n");
+         LOG("APU active position up\n");
          move_cursor(APU);
          break;
 
       case CS:
-         log("CS  clear screen\n");
+         LOG("CS  clear screen\n");
 	 t.leftright[0] = t.save_left;
 	 clearscreen();
          break;
 
       case APR:
-         log("APR active position return\n");
+         LOG("APR active position return\n");
          move_cursor(APR);
          break;
 
       case LS1:
       case LS0:
          c2 = (c1==LS1) ? 1 : 0;
-         log("LS%d locking shift G%d left\n", c2, c2);
+         LOG("LS%d locking shift G%d left\n", c2, c2);
          t.leftright[0] = c2;  /* G0 or G1 !! */
 	 t.save_left = c2;
          break;
 
       case CON:
-         log("CON cursor on\n");
+         LOG("CON cursor on\n");
 	 if(!t.cursor_on) {
 	    t.cursor_on = 1;
 	    xcursor(t.cursorx-1, t.cursory-1);
@@ -366,14 +365,14 @@ int c1;
          break;
 
       case RPT:
-         log("RPT repeat last char\n");
+         LOG("RPT repeat last char\n");
          c2 = layer2getc() & 0x3f;
-         log("    %d times\n", c2);
+         LOG("    %d times\n", c2);
          while(c2--)  output(t.lastchar);
          break;
 
       case COF:
-         log("COF cursor off\n");
+         LOG("COF cursor off\n");
 	 if(t.cursor_on) {
 	    t.cursor_on = 0;
 	    xcursor(t.cursorx-1, t.cursory-1);
@@ -381,7 +380,7 @@ int c1;
          break;
 
       case CAN:
-         log("CAN cancel\n");
+         LOG("CAN cancel\n");
 	 y = t.cursory-1;
 	 screen[y][t.cursorx-1].chr = ' ';
 	 screen[y][t.cursorx-1].set = PRIM;
@@ -397,22 +396,22 @@ int c1;
          break;
 
       case SS2:
-         log("SS2 single shift G2 left\n");
+         LOG("SS2 single shift G2 left\n");
          t.sshift = G2;
          break;
 
       case ESC:
-         log("ESC escape sequence\n");
+         LOG("ESC escape sequence\n");
          do_ESC();
          break;
 
       case SS3:
-         log("SS3 single shift G3 left\n");
+         LOG("SS3 single shift G3 left\n");
          t.sshift = G3;
          break;
 
       case APH:
-         log("APH active position home\n");
+         LOG("APH active position home\n");
 	 move_cursor(APA, 1, 1);
          t.par_attr = 0;
 	 t.par_fg = WHITE;
@@ -420,12 +419,12 @@ int c1;
          break;
 
       case US:
-         log("US  unit separator (or APA)\n");
+         LOG("US  unit separator (or APA)\n");
          do_US();
          break;
 
       default:
-         log("??? unprocessed control character 0x%02x - ignored\n", c1);
+         LOG("??? unprocessed control character 0x%02x - ignored\n", c1);
 	 if(c1 == DCT)  return 1;
    }
 
@@ -439,7 +438,7 @@ int c1;
  * Most codes advance active cursor position by one !
  */
 
-static supplementary_control_C1(c1, fullrow)  /* page 121, annex 6 */
+static void supplementary_control_C1(c1, fullrow)  /* page 121, annex 6 */
 int c1, fullrow;
 {
    int adv, mode = fullrow ? 2 : t.serialmode;
@@ -454,7 +453,7 @@ int c1, fullrow;
       case 0x85:     /*  ANM       MGF    */
       case 0x86:     /*  ANC       CNF    */
       case 0x87:     /*  ANW       WHF    */
-         log("set foreground to color #%d %s\n", t.clut*8+c1-0x80,
+         LOG("set foreground to color #%d %s\n", t.clut*8+c1-0x80,
 	     (mode==1) ? "(+ unload L set)" : "");
 	 set_attr(ATTR_FOREGROUND, 1, t.clut*8+c1-0x80, mode);
 	 if(mode==1) {
@@ -463,42 +462,42 @@ int c1, fullrow;
          break;
 
       case FSH:
-         log("FSH flashing begin\n");
+         LOG("FSH flashing begin\n");
 	 /* set_attr(ATTR_FLASH, 1, 0, mode); */
          break;
 
       case STD:
-         log("STD flashing steady\n");
+         LOG("STD flashing steady\n");
 	 /* set_attr(ATTR_FLASH, 0, 0, mode); */
          break;
 
       case EBX:
-         log("EBX end of window\n");
+         LOG("EBX end of window\n");
 	 /* set_attr(ATTR_WINDOW, 0, 0, mode); */
          break;
 
       case SBX:
-         log("SBX start of window\n");
+         LOG("SBX start of window\n");
 	 /* set_attr(ATTR_WINDOW, 1, 0, mode); */
          break;
 
       case NSZ:
-         log("NSZ normal size\n");
+         LOG("NSZ normal size\n");
 	 set_attr(ATTR_NODOUBLE, 1, 0, mode);
          break;
 
       case DBH:
-         log("DBH double height\n");
+         LOG("DBH double height\n");
 	 set_attr(ATTR_YDOUBLE, 1, 0, mode);
          break;
 
       case DBW:
-         log("DBW double width\n");
+         LOG("DBW double width\n");
 	 set_attr(ATTR_XDOUBLE, 1, 0, mode);
          break;
 
       case DBS:
-         log("DBS double size\n");
+         LOG("DBS double size\n");
 	 set_attr(ATTR_XYDOUBLE, 1, 0, mode);
          break;
 
@@ -512,7 +511,7 @@ int c1, fullrow;
       case 0x96:     /*  MSC       CNB    */
       case 0x97:     /*  MSW       WHB    */
 	 /* at fullrow control the parallel set is used ! */
-         log("set %s to color #%d\n", (mode==1) ?
+         LOG("set %s to color #%d\n", (mode==1) ?
 	     "mosaic foreground (+ invoke L set)" : "background",
 	     t.clut*8+c1-0x90);
 	 if(mode==1) {
@@ -524,62 +523,62 @@ int c1, fullrow;
          break;
 
       case CDY:
-         log("CDY conceal display\n");
+         LOG("CDY conceal display\n");
 	 set_attr(ATTR_CONCEALED, 1, 0, mode);
          break;
 
       case SPL:
-         log("SPL stop lining\n");
+         LOG("SPL stop lining\n");
 	 set_attr(ATTR_UNDERLINE, 0, 0, mode);
          break;
 
       case STL:
-         log("STL start lining\n");
+         LOG("STL start lining\n");
 	 set_attr(ATTR_UNDERLINE, 1, 0, mode);
          break;
 
       case CSI:
-         log("CSI control sequence introducer\n");
+         LOG("CSI control sequence introducer\n");
          adv = do_CSI();
          break;
 
       case 0x9c:
          if(mode==1) {
-            log("BBD black background\n");
+            LOG("BBD black background\n");
 	    set_attr(ATTR_BACKGROUND, 1, t.clut*8+BLACK, 1);
          } else {
-            log("NPO normal polarity\n");
+            LOG("NPO normal polarity\n");
 	    set_attr(ATTR_INVERTED, 0, 0, mode);
          }
          break;
 
       case 0x9d:
          if(mode==1) {
-            log("NBD new background\n");
+            LOG("NBD new background\n");
 	    set_attr(ATTR_BACKGROUND, 1,
 		     screen[t.cursory-1][t.cursorx-1].fg, 1);
          } else {
-            log("IPO inverted polarity\n");
+            LOG("IPO inverted polarity\n");
 	    set_attr(ATTR_INVERTED, 1, 0, mode);
          }
          break;
 
       case 0x9e:
          if(mode==1) {
-            log("HMS hold mosaic\n");
+            LOG("HMS hold mosaic\n");
 	    t.hold_mosaic = 1;
          } else {
-            log("TRB transparent background\n");
+            LOG("TRB transparent background\n");
 	    set_attr(ATTR_BACKGROUND, 1, TRANSPARENT, mode);
          }
          break;
 
       case 0x9f:
          if(mode==1) {
-            log("RMS release mosaic\n");
+            LOG("RMS release mosaic\n");
 	    t.hold_mosaic = 0;
          } else {
-            log("STC stop conceal\n");
+            LOG("STC stop conceal\n");
 	    set_attr(ATTR_CONCEALED, 0, 0, mode);
          }
          break;
@@ -592,7 +591,7 @@ int c1, fullrow;
 }
 
 
-static do_US()  /* page 85/86 */
+static void do_US()  /* page 85/86 */
 {
    extern int server_outfd;
    static unsigned char TFI_string[] = { SOH, US, 0x20, 0x7f, 0x40, ETB };
@@ -609,59 +608,59 @@ static do_US()  /* page 85/86 */
    switch(c2) {
 
       case 0x20:  /* annex 7.3 */
-	 log("    TFI Terminal Facility Identifier\n");
+	 LOG("    TFI Terminal Facility Identifier\n");
 	 c3 = layer2getc();
 	 if(c3==0x40) {
-	    log("       TFI request\n");
+	    LOG("       TFI request\n");
 #if 0
 	    write(server_outfd, TFI_string, 6);
 #endif
 	 }
 	 else {
-	    log("       TFI echo 0x%02x\n", c3);
+	    LOG("       TFI echo 0x%02x\n", c3);
 	    do {
 	       c3 = layer2getc();
-	       log("       TFI echo 0x%02x\n", c3);
+	       LOG("       TFI echo 0x%02x\n", c3);
 	    }
 	    while(c3 & 0x20);  /* extension bit */
 	 }
 	 break;
 	 
       case 0x23:
-         log("    define DRCS\n");
+         LOG("    define DRCS\n");
          do_DRCS();
          break;
 
       case 0x26:
-         log("    define color\n");
+         LOG("    define color\n");
          do_DEFCOLOR();
          break;
 
       case 0x2d:  /* page 155 */
-         log("    define Format\n");
+         LOG("    define Format\n");
          do_DEFFORMAT();
          break;
 
       case 0x2f:  /* page 157 */
-         log("    Reset sequence\n");
+         LOG("    Reset sequence\n");
          do_RESET();
 	 alphamosaic = 1;
          break;
 
       case 0x3e:  /* annex 7.4 */
-	 log("    Telesoftware\n");
+	 LOG("    Telesoftware\n");
 #if 0
 	 do_TSW();
 #endif
 	 break;
 	 
       default:    /* APA active position addressing */
-	 if(c2<0x40)  log("    unknown US sequence\n");
+	 if(c2<0x40)  LOG("    unknown US sequence\n");
 	 else {
 	    alphamosaic = 1;
-	    log("    new row    %2d\n", c2 & 0x3f);
+	    LOG("    new row    %2d\n", c2 & 0x3f);
 	    c3 = layer2getc();
-	    log("    new column %2d\n", c3 & 0x3f);
+	    LOG("    new column %2d\n", c3 & 0x3f);
 	    move_cursor(APA, c2 & 0x3f, c3 & 0x3f);
 	    t.par_attr = 0;
 	    t.par_fg = WHITE;
@@ -676,14 +675,14 @@ static do_US()  /* page 85/86 */
     * other VPDE's has to be skipped (*17420101711a#).
     */
    if(!alphamosaic) {
-      while( (c2 = layer2getc()) != US )  log("skipping to next US\n");
-      log("\n");
+      while( (c2 = layer2getc()) != US )  LOG("skipping to next US\n");
+      LOG("\n");
       layer2ungetc();
    }
 }
          
 
-static do_ESC()
+static void do_ESC()
 {
    int y, c2, c3, c4;
    
@@ -692,9 +691,9 @@ static do_ESC()
    switch(c2) {
 
       case 0x22:
-         log("    invoke C1\n");
+         LOG("    invoke C1\n");
          c3 = layer2getc();
-         log("       (%s)\n", c3==0x40 ? "serial" : "parallel");
+         LOG("       (%s)\n", c3==0x40 ? "serial" : "parallel");
 	 if(c3==0x40)  t.serialmode = 1;
 	 else {
 	    t.serialmode = 0;
@@ -703,22 +702,22 @@ static do_ESC()
          break;
 
       case 0x23:
-         log("    set attributes\n");
+         LOG("    set attributes\n");
          c3 = layer2getc();
          switch(c3) {
             case 0x20:
-               log("       full screen background\n");
+               LOG("       full screen background\n");
                c4 = layer2getc();
-               log("          color = %d\n",
+               LOG("          color = %d\n",
 		   c4==0x5e ? TRANSPARENT : t.clut*8+c4-0x50);
 	       for(y=0; y<24; y++)
 	          define_fullrow_bg(y, c4==0x5e ?
 				    TRANSPARENT : t.clut*8+c4-0x50);
                break;
             case 0x21:
-               log("       full row\n");
+               LOG("       full row\n");
                c4 = layer2getc();
-	       log("          ");
+	       LOG("          ");
 	       supplementary_control_C1(c4+0x40, 1);
                break;
          }
@@ -728,61 +727,61 @@ static do_ESC()
       case 0x29:
       case 0x2a:
       case 0x2b:
-         log("    load G%d with\n", c2 - 0x28);
+         LOG("    load G%d with\n", c2 - 0x28);
          c3 = layer2getc();
          switch(c3) {
             case 0x40:
-               log("       'primary graphic'\n");
+               LOG("       'primary graphic'\n");
                t.G0123L[c2 - 0x28] = PRIM;
                t.prim = c2 - 0x28;
                break;
             case 0x62:
-               log("       'supplementary graphic'\n");
+               LOG("       'supplementary graphic'\n");
                t.G0123L[c2 - 0x28] = SUPP;
                t.supp = c2 - 0x28;
                break;
             case 0x63:
-               log("       '2nd supplementary mosaic'\n");
+               LOG("       '2nd supplementary mosaic'\n");
                t.G0123L[c2 - 0x28] = SUP2;
                break;
             case 0x64:
-               log("       '3rd supplementary mosaic'\n");
+               LOG("       '3rd supplementary mosaic'\n");
                t.G0123L[c2 - 0x28] = SUP3;
                break;
             case 0x20:
-	       log("       DRCS\n");
+	       LOG("       DRCS\n");
                c4 = layer2getc();
-               if(c4 != 0x40)  log("HAEH  (ESC 0x%02x 0x20 0x%02x)\n", c2, c4);
-	       else            log("\n");
+               if(c4 != 0x40)  LOG("HAEH  (ESC 0x%02x 0x20 0x%02x)\n", c2, c4);
+	       else            LOG("\n");
                t.G0123L[c2 - 0x28] = DRCS;
                break;
          }
          break;               
       
       case 0x6e:
-         log("    LS2 locking shift G2 left\n");
+         LOG("    LS2 locking shift G2 left\n");
          t.leftright[0] = G2;
 	 t.save_left = G2;
          break;
 
       case 0x6f:
-         log("    LS3 locking shift G3 left\n");
+         LOG("    LS3 locking shift G3 left\n");
          t.leftright[0] = G3;
 	 t.save_left = G3;
          break;
 
       case 0x7c:
-         log("    LS3R locking shift G3 right\n");
+         LOG("    LS3R locking shift G3 right\n");
          t.leftright[1] = G3;
          break;
 
       case 0x7d:
-         log("    LS2R locking shift G2 right\n");
+         LOG("    LS2R locking shift G2 right\n");
          t.leftright[1] = G2;
          break;
 
       case 0x7e:
-         log("    LS1R locking shift G1 right\n");
+         LOG("    LS1R locking shift G1 right\n");
          t.leftright[1] = G1;
          break;
    }
@@ -803,32 +802,32 @@ static int do_CSI()
    
    c2 = layer2getc();
    if(c2 == 0x42) {
-      log("    STC stop conceal\n");
+      LOG("    STC stop conceal\n");
       set_attr(ATTR_CONCEALED, 0, 0, t.serialmode);
       return 0;
    }
    
-   log("\n");
+   LOG("\n");
    c3 = layer2getc();
 
    /* protection only available as fullrow controls ?? (page 135) */
    if(c2 == 0x31 && c3 == 0x50) {
-      log("       PMS protected mode start\n");
+      LOG("       PMS protected mode start\n");
       set_attr(ATTR_PROTECTED, 1, 0, 2);
       return 0;
    }
    if(c2 == 0x31 && c3 == 0x51) {
-      log("       PMC protected mode cancel\n");
+      LOG("       PMC protected mode cancel\n");
       set_attr(ATTR_PROTECTED, 0, 0, 2);
       return 0;
    }
    if(c2 == 0x32 && c3 == 0x53) {
-      log("       MMS marked mode start\n");
+      LOG("       MMS marked mode start\n");
       /* set_attr(ATTR_MARKED, 1, 0, t.serialmode); */
       return 0;
    }
    if(c2 == 0x32 && c3 == 0x54) {
-      log("       MMT marked mode stop\n");
+      LOG("       MMT marked mode stop\n");
       /* set_attr(ATTR_MARKED, 0, 0, t.serialmode); */
       return 0;
    }
@@ -836,28 +835,28 @@ static int do_CSI()
    switch(c3) {
 
       case 0x40:
-         log("       invoke CLUT%d\n", c2 - 0x2f);
+         LOG("       invoke CLUT%d\n", c2 - 0x2f);
 	 t.clut = c2 - 0x30;
          return 0;
 
       case 0x41:
          switch(c2) {
             case 0x30:
-               log("       IVF inverted flash\n");
+               LOG("       IVF inverted flash\n");
                return 1;
             case 0x31:
-               log("       RIF reduced intesity flash\n");
+               LOG("       RIF reduced intesity flash\n");
                return 1;
             case 0x32:
             case 0x33:
             case 0x34:
-               log("       FF%c fast flash %c\n", c2-1, c2-1);
+               LOG("       FF%c fast flash %c\n", c2-1, c2-1);
                return 1;
             case 0x35:
-               log("       ICF increment flash\n");
+               LOG("       ICF increment flash\n");
                return 1;
             case 0x36:
-               log("       DCF decrement flash\n");
+               LOG("       DCF decrement flash\n");
                return 1;
          }
          break;
@@ -865,19 +864,19 @@ static int do_CSI()
       case 0x60:
          switch(c2) {
             case 0x30:
-               log("       SCU explicit scroll up\n");
+               LOG("       SCU explicit scroll up\n");
 	       if(t.scroll_area) scroll(1);
                return 0;
             case 0x31:
-               log("       SCD explicit scroll down\n");
+               LOG("       SCD explicit scroll down\n");
 	       if(t.scroll_area) scroll(0);
                return 0;
             case 0x32:
-               log("       AIS activate implicite scrolling\n");
+               LOG("       AIS activate implicite scrolling\n");
 	       t.scroll_impl = 1;
                return 0;
             case 0x33:
-               log("       DIS deactivate implicite scrolling\n");
+               LOG("       DIS deactivate implicite scrolling\n");
 	       t.scroll_impl = 0;
                return 0;
          }
@@ -886,20 +885,20 @@ static int do_CSI()
       default:  /* definition of scrolling area (page 137) */
 	 upper = c2 & 0x0f;
 	 if(c3>=0x30 && c3<=0x39)  upper = upper*10 + (c3&0x0f);
-	 log("       upper row: %2d\n", upper);
-	 if(c3>=0x30 && c3<=0x39)  { c3 = layer2getc(); log("\n"); }
+	 LOG("       upper row: %2d\n", upper);
+	 if(c3>=0x30 && c3<=0x39)  { c3 = layer2getc(); LOG("\n"); }
 
 /*	 if(c3!=0x3b)  fprintf(stderr, "XCEPT: scrolling area - protocol !\n");
 */
 	 lower = layer2getc() & 0x0f;
-	 log("\n");
+	 LOG("\n");
 	 c3 = layer2getc();
 	 if(c3>=0x30 && c3<=0x39)  lower = lower*10 + (c3&0x0f);
-	 log("       lower row: %2d", lower);
-	 if(c3>=0x30 && c3<=0x39)  { log("\n"); c3=layer2getc(); log("    "); }
+	 LOG("       lower row: %2d", lower);
+	 if(c3>=0x30 && c3<=0x39)  { LOG("\n"); c3=layer2getc(); LOG("    "); }
 	 
 	 if(c3==0x55) {
-	    log("   CSA create scrolling area\n");
+	    LOG("   CSA create scrolling area\n");
 	    if(upper>=2 && lower<rows && lower>=upper) {
 	       t.scroll_upper = upper;
 	       t.scroll_lower = lower;
@@ -907,7 +906,7 @@ static int do_CSI()
 	    }
 	 }
 	 if(c3==0x56) {
-	    log("   CSD delete scrolling area\n");
+	    LOG("   CSD delete scrolling area\n");
 	    t.scroll_area = 0;
 	 }
          return 0;
@@ -917,68 +916,68 @@ static int do_CSI()
 }
 
 
-static do_DRCS()   /* (page 139ff) */
+static void do_DRCS()   /* (page 139ff) */
 {
    int c3, c4, c5, c6, c7, c8;
 
    c3 = layer2getc();
    if(c3 == 0x20) {
-      log("       DRCS header unit\n");
+      LOG("       DRCS header unit\n");
       c4 = layer2getc();
       if(c4==0x20 || c4==0x28) {
-	 log("          %s existing DRCS\n", (c4==0x20) ? "keep" : "delete");
+	 LOG("          %s existing DRCS\n", (c4==0x20) ? "keep" : "delete");
 	 if(c4==0x28)  free_DRCS();
 	 c5 = layer2getc();
       } else c5 = c4;
       if(c5 == 0x20) {
-	 log("\n");
+	 LOG("\n");
 	 c6 = layer2getc();
       } else c6 = c5;
       if(c6 == 0x40) {
-	 log("\n");
+	 LOG("\n");
 	 c7 = layer2getc();
       } else c7 = c6;
 
       switch(c7 & 0xf) {
          case 6:
-	    log("          12x12 pixel\n");
+	    LOG("          12x12 pixel\n");
 	    t.drcs_w = 12;
 	    t.drcs_h = 12;
 	    break;
 	 case 7:
-	    log("          12x10 pixel\n");
+	    LOG("          12x10 pixel\n");
 	    t.drcs_w = 12;
 	    t.drcs_h = 10;
 	    break;
 	 case 10:
-	    log("          6x12 pixel\n");
+	    LOG("          6x12 pixel\n");
 	    t.drcs_w = 6;
 	    t.drcs_h = 12;
 	    break;
 	 case 11:
-	    log("          6x10 pixel\n");
+	    LOG("          6x10 pixel\n");
 	    t.drcs_w = 6;
 	    t.drcs_h = 10;
 	    break;
 	 case 12:
-	    log("          6x5 pixel\n");
+	    LOG("          6x5 pixel\n");
 	    t.drcs_w = 6;
 	    t.drcs_h = 5;
 	    break;
 	 case 15:
-	    log("          6x6 pixel\n");
+	    LOG("          6x6 pixel\n");
 	    t.drcs_w = 6;
 	    t.drcs_h = 6;
 	    break;
       }
 
       c8 = layer2getc();
-      log("          %d bit/pixel\n", c8 & 0xf);
+      LOG("          %d bit/pixel\n", c8 & 0xf);
       t.drcs_bits = c8 & 0xf;
       t.drcs_step = (t.drcs_h>=10 && t.drcs_w*t.drcs_bits==24)  ?  2 : 1;
    }
    else {
-      log("       DRCS pattern transfer unit (char: 0x%02x)\n", c3);
+      LOG("       DRCS pattern transfer unit (char: 0x%02x)\n", c3);
       do_DRCS_data(c3);
    }
 }
@@ -989,7 +988,7 @@ static do_DRCS()   /* (page 139ff) */
  * more than one bitplane of a character may be loaded simultaneously !
  */
 
-static do_DRCS_data(c)
+static void do_DRCS_data(c)
 int c;
 {
    static char data[4][2*FONT_HEIGHT];
@@ -1005,7 +1004,7 @@ int c;
       switch(c4) {
          case 0x20:  /* S-bytes */
          case 0x2f:
-	    log("          fill rest of char with %d\n", c4 & 1);
+	    LOG("          fill rest of char with %d\n", c4 & 1);
 	    for(; byte<maxbytes; byte++)
 	       for(n=0; n<4; n++)
 	          if(planemask & (1<<n)) data[n][byte] = (c4==0x20) ? 0 : 0xff;
@@ -1020,7 +1019,7 @@ int c;
 	 case 0x28:
 	 case 0x29:
 	 case 0x2a:
-	    log("          repeat last row %d times\n", c4 & 0xf);
+	    LOG("          repeat last row %d times\n", c4 & 0xf);
 	    if(byte&1) byte++;   /* pad to full row (assume 0) */
             for(i=0; i<(c4 & 0xf); i++) {
 	       for(n=0; n<4; n++)
@@ -1038,7 +1037,7 @@ int c;
             break;
 	 case 0x2c:
 	 case 0x2d:
-	    log("          full row %d\n", c4 & 1);
+	    LOG("          full row %d\n", c4 & 1);
 	    if(byte&1) byte++;   /* pad to full row (assume 0) */
             for(n=0; n<4; n++)
 	       if(planemask & (1<<n)) {
@@ -1053,7 +1052,7 @@ int c;
 	    if(t.drcs_h<10)  byte += 2;
             break;
 	 case 0x2e:
-	    log("          fill rest of char with last row\n");
+	    LOG("          fill rest of char with last row\n");
 	    if(byte&1) byte++;   /* pad to full row (assume 0) */
             while(byte<maxbytes) {
 	       for(n=0; n<4; n++)
@@ -1070,12 +1069,12 @@ int c;
          case 0x32:
          case 0x33:
 	    if(byte) {
-	       log("          new plane ahead - filling up\n");
+	       LOG("          new plane ahead - filling up\n");
 	       byte = maxbytes;   /* pad to full plane */
 	       layer2ungetc();
 	    }
 	    else {
-	       log("          start of pattern block (plane %d)\n", c4 & 0xf);
+	       LOG("          start of pattern block (plane %d)\n", c4 & 0xf);
 	       for(i=0; i<2*FONT_HEIGHT; i++)  data[c4 & 0xf][i] = 0;
 	       planemask |= 1 << (c4 & 0xf);
 	    }
@@ -1083,12 +1082,12 @@ int c;
 
 	 default:
             if(c4<0x20 || c4>0x7f) {
-	       log("          end of pattern data\n");
+	       LOG("          end of pattern data\n");
 	       layer2ungetc();
 	       if(byte)  byte = maxbytes;
 	    }
 	    else {   /* D-bytes */
-	       log("          pattern data\n");
+	       LOG("          pattern data\n");
 	       if(t.drcs_w==6) {   /* low res */
 		  for(n=0; n<4; n++)
 		     if(planemask & (1<<n))  {
@@ -1139,25 +1138,25 @@ int c;
 /*
  * pretty print the received character to the log file
  */
-static log_DRC(c, data, bits)
+static void log_DRC(c, data, bits)
 int c, bits;
 char data[4][2*FONT_HEIGHT];
 {
    int n, i, j, k;
    
-   log("\n                      DRC # 0x%2x\n", c);
+   LOG("\n                      DRC # 0x%2x\n", c);
    for(n=0; n<bits; n++) {
-      log("                      (plane %d)\n", n);
-      log("                      --------------------------\n");
+      LOG("                      (plane %d)\n", n);
+      LOG("                      --------------------------\n");
       for(j=0; j<fontheight; j++) {
-	 log("                      |");
+	 LOG("                      |");
 	 for(k=0; k<2; k++)
 	    for(i=5; i>=0; i--)
-	       if(data[n][j*2+k] & (1<<i)) log("* ");
-	       else                        log("  ");
-	 log("|\n");
+	       if(data[n][j*2+k] & (1<<i)) LOG("* ");
+	       else                        LOG("  ");
+	 LOG("|\n");
       }
-      log("                      --------------------------\n\n");
+      LOG("                      --------------------------\n\n");
    }
 }
 
@@ -1165,7 +1164,7 @@ char data[4][2*FONT_HEIGHT];
 /*
  * load and define dynamic colors.
  */
-static do_DEFCOLOR()  /* (page 150ff) */
+static void do_DEFCOLOR()  /* (page 150ff) */
 {
    int c3, c4, c5, c6, c7, index, r, g, b;
 
@@ -1174,89 +1173,89 @@ static do_DEFCOLOR()  /* (page 150ff) */
    switch(c3) {
 
       case 0x20:   /*  US 0x26 0x20 <ICT> <SUR> <SCM>  */
-         log("       color header unit\n");
+         LOG("       color header unit\n");
          t.col_modmap = 1;    /* by default modify colormap */
          c4 = layer2getc();
          if((c4 & 0xf0) == 0x20) {
 	    if(c4!=0x20 && c4!=0x22) {
-	       log("*** <ICT>: bad value !\n");
+	       LOG("*** <ICT>: bad value !\n");
 	       fprintf(stderr, "XCEPT: do_DEFCOLOR(): ICT1 = 0x%02x\n", c4);
 	    }
-            log("          <ICT>: load %s\n", c4==0x20 ? "colormap" : "DCLUT");
+            LOG("          <ICT>: load %s\n", c4==0x20 ? "colormap" : "DCLUT");
 	    t.col_modmap = (c4==0x20);
             c5 = layer2getc();
          } else c5 = c4;
          if((c5 & 0xf0) == 0x20) {
-            log("          <ICT>: (unit %d)\n", c5&0xf);
+            LOG("          <ICT>: (unit %d)\n", c5&0xf);
 	    if(c5!=0x20) {
-	       log("*** <ICT>: bad value !\n");
+	       LOG("*** <ICT>: bad value !\n");
 	       fprintf(stderr, "XCEPT: do_DEFCOLOR(): ICT2 = 0x%02x\n", c5);
 	    }
             c6 = layer2getc();
          } else c6 = c5;
          if((c6 & 0xf0) == 0x30) {
-            log("          <SUR>: %d bits\n", c6&0xf);
+            LOG("          <SUR>: %d bits\n", c6&0xf);
 	    if(c6!=0x34 && c6!=0x35) {
-	       log("*** <SUR>: bad value !\n");
+	       LOG("*** <SUR>: bad value !\n");
 	       fprintf(stderr, "XCEPT: do_DEFCOLOR(): SUR = 0x%02x\n", c6);
 	    }
             c7 = layer2getc();
          } else c7 = c6;
          if((c7 & 0xf0) == 0x40) {
-            log("          <SCM>: 0x%02x\n", c7);
+            LOG("          <SCM>: 0x%02x\n", c7);
 	    if(c7!=0x40 && c7!=0x41) {
-	       log("*** <SCM>: bad value !\n");
+	       LOG("*** <SCM>: bad value !\n");
 	       fprintf(stderr, "XCEPT: do_DEFCOLOR(): SCM = 0x%02x\n", c7);
 	    }
          } else {
-            log("          default header\n");
+            LOG("          default header\n");
             layer2ungetc();
          }
          break;
 
       case 0x21:
-         log("       color reset unit\n");
+         LOG("       color reset unit\n");
 	 default_colors();
          break;
 
       default:
-         log("       color transfer unit  (1.Stelle: %d)\n", c3&0xf);
+         LOG("       color transfer unit  (1.Stelle: %d)\n", c3&0xf);
 	 index = c3&0xf;
          c4 = layer2getc();
          if((c4 & 0xf0) == 0x30) { /* c3 zehner, c4 einer */
-            log("                            (2.Stelle: %d)\n", c4&0xf);
+            LOG("                            (2.Stelle: %d)\n", c4&0xf);
 	    index = (c3&0xf)*10 + (c4&0xf);
             c5 = layer2getc();
          } else c5 = c4;
 
 	 if(t.col_modmap) {  /* load colormap */
 	    while(c5>=0x40 && c5<=0x7f) {
-	       log("          color #%2d:  R G B\n", index);
+	       LOG("          color #%2d:  R G B\n", index);
 	       c6 = layer2getc();
 	       r = (c5&0x20)>>2 | (c5&0x04)    | (c6&0x20)>>4 | (c6&0x04)>>2;
 	       g = (c5&0x10)>>1 | (c5&0x02)<<1 | (c6&0x10)>>3 | (c6&0x02)>>1;
 	       b = (c5&0x08)    | (c5&0x01)<<2 | (c6&0x08)>>2 | (c6&0x01);
-	       log("                      %1x %1x %1x\n", r, g, b);
+	       LOG("                      %1x %1x %1x\n", r, g, b);
 	       if(index>=16 && index<=31)  define_color(index++, r, g, b);
 	       c5 = layer2getc();
 	    }
 	 }
 	 else {  /* load DCLUT */
 	    while(c5>=0x40 && c5<=0x7f) {
-	       log("          DCLUT[%2d] = %2d\n", index, c5&0x1f);
+	       LOG("          DCLUT[%2d] = %2d\n", index, c5&0x1f);
 	       if(index>=0 && index<=3)  define_DCLUT(index++, c5&0x1f);
 	       c5 = layer2getc();
 	    }
 	 }
 
-	 log("          end of color data\n");
+	 LOG("          end of color data\n");
          layer2ungetc();
          break;
    }
 }
 
    
-static do_DEFFORMAT()   /* format designation  (page 155) */
+static void do_DEFFORMAT()   /* format designation  (page 155) */
 {
    int c3, c4;
 
@@ -1268,15 +1267,15 @@ static do_DEFFORMAT()   /* format designation  (page 155) */
    if((c3&0xf0) == 0x40) {
       switch(c3) {
          case 0x41:
-            log("       40 columns by 24 rows\n");
+            LOG("       40 columns by 24 rows\n");
 	    break;
          case 0x42:
-	    log("       40 columns by 20 rows\n");
+	    LOG("       40 columns by 20 rows\n");
 	    rows = 20;
 	    fontheight = 12;
 	    break;
          default:
-	    log("       unrecognized format (using default)\n");
+	    LOG("       unrecognized format (using default)\n");
 	    break;
       }
       c4 = layer2getc();
@@ -1284,17 +1283,17 @@ static do_DEFFORMAT()   /* format designation  (page 155) */
    else c4 = c3;
    
    if((c4&0xf0) == 0x70) {
-      log("       wraparound %s\n", (c3&1) ? "inactive" : "active");
+      LOG("       wraparound %s\n", (c3&1) ? "inactive" : "active");
       t.wrap = (c3 == 0x70) ? 1 : 0;
    }
    else {
-      log("       default format\n");
+      LOG("       default format\n");
       layer2ungetc();
    }
 }
 
 
-static do_RESET()  /* reset functions  (page 157) */
+static void do_RESET()  /* reset functions  (page 157) */
 {
    int y, c3, c4;
 
@@ -1303,9 +1302,9 @@ static do_RESET()  /* reset functions  (page 157) */
    switch(c3) {
 
       case 0x40:   /* (page 158) */
-         log("       service break to row\n");
+         LOG("       service break to row\n");
          c4 = layer2getc();
-         log("          #%d\n", c4 & 0x3f);
+         LOG("          #%d\n", c4 & 0x3f);
          backup = t;  /* structure copy */
          t.leftright[0] = t.prim;  /* PFUSCH !!! */
          t.leftright[1] = t.supp;
@@ -1320,7 +1319,7 @@ static do_RESET()  /* reset functions  (page 157) */
 
       case 0x41:
       case 0x42:
-         log("       defaults (%s C1)\n", c3&1 ? "serial" : "parallel");
+         LOG("       defaults (%s C1)\n", c3&1 ? "serial" : "parallel");
          default_sets();
          t.serialmode = c3 & 1;
          t.wrap = 1;
@@ -1333,13 +1332,13 @@ static do_RESET()  /* reset functions  (page 157) */
 
       case 0x43:
       case 0x44:
-         log("       limited defaults (%s C1)\n", c3&1 ? "serial":"parallel");
+         LOG("       limited defaults (%s C1)\n", c3&1 ? "serial":"parallel");
          default_sets();
          t.serialmode = c3 & 1;
          break;
 
       case 0x4f:
-         log("       reset to previous state\n");
+         LOG("       reset to previous state\n");
          t = backup;
 	 move_cursor(APA, t.cursory, t.cursorx);
          break;
@@ -1488,7 +1487,7 @@ int a, set, col, mode;
  * output character c from current set at current cursor position.
  */
 
-static output(c)
+static void output(c)
 int c;
 {
    int xd, yd, set, mattr, x = t.cursorx, y = t.cursory;
@@ -1579,7 +1578,7 @@ int c;
  * if not concealed or obscured
  */
 
-static redrawc(x, y)
+static void redrawc(x, y)
 int x, y;
 {
    extern int tia, reveal;
@@ -1670,7 +1669,7 @@ int x, y;
  * this character has been obscured. check whether it was an enlarged char
  * and therefor its neighbours have to be redrawn.
  */
-static updatec(real, x, y)
+static void updatec(real, x, y)
 int real, x, y;
 {
    if(real & ATTR_XDOUBLE)  redrawc(x+1, y);
@@ -1682,7 +1681,7 @@ int real, x, y;
 /*
  * redraw rectangle of screen (for exposure handling)
  */
-redraw_screen_rect(x1, y1, x2, y2)
+void redraw_screen_rect(x1, y1, x2, y2)
 int x1, y1, x2, y2;
 {
    int x, y;
@@ -1698,7 +1697,7 @@ int x1, y1, x2, y2;
  * needs to be redisplayed.
  */
 
-static update_DRCS_display(start, stop, step)
+static void update_DRCS_display(start, stop, step)
 int start, stop, step;
 {
    int x, y, c;
@@ -1715,7 +1714,7 @@ int start, stop, step;
  * initialize screen memory and clear display
  */
 
-static clearscreen()
+static void clearscreen()
 {
    int x, y;
    
@@ -1743,7 +1742,7 @@ static clearscreen()
 }
 
 
-static scroll(up)
+static void scroll(up)
 int up;
 {
    int y, x, savereal[40];
@@ -1798,7 +1797,7 @@ int up;
  * layer 6 debug log routine. (varargs !?!)
  */
 
-void log(const char *format, ...)
+void LOG(const char *format, ...)
 {
    extern FILE *textlog;
    extern int visible;
