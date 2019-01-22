@@ -40,8 +40,6 @@
 #include "attrib.h"
 #include "xfont.h"
 
-void	 free(void *);
-
 struct btxchar {
    struct btxchar *link;    /* NULL: use this char,  else: use linked char */
    char *raw;               /* pointer to raw font data */
@@ -102,8 +100,7 @@ static void init_colormap(void);
  * initialize character sets. No Pixmaps are created.
  */
 
-void
-init_fonts()
+void init_fonts()
 {
    static char raw_del[] = { 0x3f, 0x3f, 0x3f, 0x3f, 0x3f, 0x3f, 0x3f, 0x3f,
 			     0x3f, 0x3f, 0x3f, 0x3f, 0x3f, 0x3f, 0x3f, 0x3f,

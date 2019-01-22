@@ -204,6 +204,7 @@ static uint8_t keys;
     memimage = malloc(MEMIMAGE_SIZE);
     textlog = stderr;
     
+    init_fonts();
     init_layer6();
     f = fopen("/tmp/1.cept", "r");
 
