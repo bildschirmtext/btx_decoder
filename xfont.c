@@ -157,8 +157,7 @@ init_fonts()
  * created and cached.
  */
 
-void xputc(c, set, x, y, xdouble, ydouble, underline, diacrit, fg, bg)
-int c, set, x, y, xdouble, ydouble, underline, diacrit, fg, bg;
+void xputc(int c, int set, int x, int y, int xdouble, int ydouble, int underline, int diacrit, int fg, int bg)
 {
    extern int rows;
    struct btxchar *ch, *dia;

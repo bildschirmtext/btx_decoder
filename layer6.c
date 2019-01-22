@@ -40,14 +40,16 @@
 #include "font.h"
 #include "attrib.h"
 #include "protocol.h"
+#include "xfont.h"
 
 #if 1
 #include <stdarg.h>
 void LOG(const char *format, ...);
 void xbtxerror(int perr, const char *format, ...);
-int visible=0, tia=0, reveal=0;
-FILE *textlog=NULL;
+int tia=0, reveal=0;
 unsigned char *memimage=NULL;
+extern void layer2ungetc(void);
+extern int layer2getc(void);
 #endif
 
 /* exported variables */
@@ -79,14 +81,26 @@ static struct {
 } t, backup;
 
 /* local functions */
-static void default_sets(), do_US();
-static int primary_control_C0(), do_CSI();
-static void supplementary_control_C1(), do_ESC(), do_DRCS(), log_DRC();
-static void do_DRCS_data(), do_DEFCOLOR(), do_DEFFORMAT(), do_RESET();
-static void set_attr();
-static void output(), redrawc(), updatec(), update_DRCS_display(), clearscreen();
-static void scroll();
-void do_TSW();
+static void default_sets(void);
+static void do_US(void);
+static int primary_control_C0(int c1);
+static int do_CSI(void);
+static void supplementary_control_C1(int c1, int fullrow);
+static void do_ESC(void);
+static void do_DRCS(void);
+static void log_DRC(int c, char data[4][2*FONT_HEIGHT], int bits);
+static void do_DRCS_data(int c);
+static void do_DEFCOLOR(void);
+static void do_DEFFORMAT(void);
+static void do_RESET(void);
+static void set_attr(int a, int set, int col, int mode);
+static void output(int c);
+static void redrawc(int x, int y);
+static void updatec(int real, int x, int y);
+static void update_DRCS_display(int start, int stop, int tep);
+static void clearscreen(void);
+static void scroll(int up);
+//void do_TSW();
 
 /*
  * initialize layer6 variables
@@ -117,7 +131,7 @@ void init_layer6()
  * Returns 1 when DCT (terminate data collect 0x1a) is received, else 0.
  */
 
-process_BTX_data()
+int process_BTX_data()
 {
    int set, c1, c2, dct=0;
 
@@ -146,72 +160,6 @@ process_BTX_data()
 
 
 /*
- * get one byte from protocol layer 2.
- */
-int layer2getc()
-{
-#if 0
-   extern int server_infd;
-   unsigned char c;
-   int status;
-   
-   if(!reachedEOF) {
-      if((status = read1(server_infd, &c, 1)) <= 0) {
-	 if(status < 0)  xbtxerror(1, "layer2getc()");
-	 reachedEOF = 1;
-      }
-
-      /* btxserver special protocol (STX STX CODE) */
-      if(!reachedEOF && c==STX) {
-	 if((status = read1(server_infd, &c, 1)) <= 0) {
-	    if(status < 0)  xbtxerror(1, "layer2getc()");
-	    reachedEOF = 1;
-	 }
-	 if(!reachedEOF && c==STX) { /* second STX, read CODE now */
-	    if((status = read1(server_infd, &c, 1)) <= 0) {
-	       if(status < 0)  xbtxerror(1, "layer2getc()");
-	       reachedEOF = 1;
-	    }
-	    if(c <= MAXPROTOCOLSEQ)  serverstatus(c);
-	    LOG("\nXCEPTD STATUS CODE: %d\n\n", c);
-
-	    if(!reachedEOF && (status = read1(server_infd, &c, 1)) <= 0) {
-	       if(status < 0)  xbtxerror(1, "layer2getc()");
-	       reachedEOF = 1;
-	    }
-	 }
-	 else read1(0, NULL, -1);  /* second char was != STX */
-      }
-   }
-
-   if(reachedEOF)  c = US;
-      
-   LOG("(%c %03x %2d/%2d %2x/%2x) (0x%02x)   ", t.serialmode ? 'S' : 'P',
-       t.serialmode ? screen[t.cursory-1][t.cursorx-1].attr : t.par_attr,
-       t.cursory, t.cursorx, 
-       t.serialmode ? screen[t.cursory-1][t.cursorx-1].fg : t.par_fg,
-       t.serialmode ? screen[t.cursory-1][t.cursorx-1].bg : t.par_bg, c);
-
-   return c;
-#else
-   return 0;
-#endif
-}
-
-
-/*
- * unget character 'c'. Only one character of pushback is guaranteed !
- */
-void layer2ungetc()
-{
-#if 0
-   read1(0, NULL, -1);
-#endif
-   LOG("<-- character pushed back\n");
-}
-
-
-/*
  * initialize default character sets (page 113)
  */
 static void default_sets()
@@ -234,8 +182,7 @@ static void default_sets()
  * move the cursor, perform automatic wraparound (page 97)
  *                  and implicite scrolling (page 101)
  */
-static void move_cursor(cmd, y, x)
-int cmd, y, x;
+static void move_cursor(int cmd, int y, int x)
 {
    int up=0, down=0;
 
@@ -310,8 +257,7 @@ int cmd, y, x;
  * Returns 1 when DCT is received, else 0.
  */
 
-static int primary_control_C0(c1)  /* page 118, annex 6 */
-int c1;
+static int primary_control_C0(int c1)  /* page 118, annex 6 */
 {
    int c2, x, y;
    
@@ -319,22 +265,22 @@ int c1;
 
       case APB:
          LOG("APB active position back\n");
-         move_cursor(APB);
+         move_cursor(APB, -1, -1);
          break;
          
       case APF:
          LOG("APF active position forward\n");
-         move_cursor(APF);
+         move_cursor(APF, -1, -1);
          break;
 
       case APD:
          LOG("APD active position down\n");
-         move_cursor(APD);
+         move_cursor(APD, -1, -1);
          break;
 
       case APU:
          LOG("APU active position up\n");
-         move_cursor(APU);
+         move_cursor(APU, -1, -1);
          break;
 
       case CS:
@@ -345,7 +291,7 @@ int c1;
 
       case APR:
          LOG("APR active position return\n");
-         move_cursor(APR);
+         move_cursor(APR, -1, -1);
          break;
 
       case LS1:
@@ -438,8 +384,7 @@ int c1;
  * Most codes advance active cursor position by one !
  */
 
-static void supplementary_control_C1(c1, fullrow)  /* page 121, annex 6 */
-int c1, fullrow;
+static void supplementary_control_C1(int c1, int fullrow)  /* page 121, annex 6 */
 {
    int adv, mode = fullrow ? 2 : t.serialmode;
 
@@ -587,7 +532,7 @@ int c1, fullrow;
    /* serial attribute controls advance cursor 1 char forwards !  (page 90) */
    if(mode==1 && (c1!=CSI || adv) )
       if(t.hold_mosaic)  output(t.lastchar);  /* HMS/RMS (page 96) */
-      else               move_cursor(APF);
+      else               move_cursor(APF, -1, -1);
 }
 
 
@@ -988,8 +933,7 @@ static void do_DRCS()   /* (page 139ff) */
  * more than one bitplane of a character may be loaded simultaneously !
  */
 
-static void do_DRCS_data(c)
-int c;
+static void do_DRCS_data(int c)
 {
    static char data[4][2*FONT_HEIGHT];
    int c4, i, n, planes=0, planemask=0, byte=0;
@@ -1138,9 +1082,7 @@ int c;
 /*
  * pretty print the received character to the log file
  */
-static void log_DRC(c, data, bits)
-int c, bits;
-char data[4][2*FONT_HEIGHT];
+static void log_DRC(int c, char data[4][2*FONT_HEIGHT], int bits)
 {
    int n, i, j, k;
    
@@ -1362,8 +1304,7 @@ static void do_RESET()  /* reset functions  (page 157) */
  *      set at this position
  */
 
-static void set_attr(a, set, col, mode)
-int a, set, col, mode;
+static void set_attr(int a, int set, int col, int mode)
 {
    int x, y = t.cursory-1, refresh, mattr = a;
 
@@ -1387,7 +1328,7 @@ int a, set, col, mode;
 	 (a==ATTR_YDOUBLE || a==ATTR_XYDOUBLE) &&
 	 t.scroll_area && t.cursory==t.scroll_lower) {
 	 scroll(1);
-	 move_cursor(APU);
+	 move_cursor(APU, -1, -1);
 	 y = t.cursory-1;
       }
       
@@ -1487,8 +1428,7 @@ int a, set, col, mode;
  * output character c from current set at current cursor position.
  */
 
-static void output(c)
-int c;
+static void output(int c)
 {
    int xd, yd, set, mattr, x = t.cursorx, y = t.cursory;
    
@@ -1519,7 +1459,7 @@ int c;
 	 /* force a scroll down + a cursor down before writing (page 101) */
 	 if(yd && t.scroll_area && y==t.scroll_upper) {
 	    scroll(0);
-	    move_cursor(APD);
+	    move_cursor(APD, -1, -1);
 	    y = t.cursory;
 	 }
 	 
@@ -1567,8 +1507,8 @@ int c;
       } /* if not protected */
    }  /* if serial / parallel */
    
-   if(xd && t.cursorx<40)  move_cursor(APF);
-   move_cursor(APF);
+   if(xd && t.cursorx<40)  move_cursor(APF, -1, -1);
+   move_cursor(APF, -1, -1);
    t.sshift = 0;
 }
 
@@ -1578,8 +1518,7 @@ int c;
  * if not concealed or obscured
  */
 
-static void redrawc(x, y)
-int x, y;
+static void redrawc(int x, int y)
 {
    extern int tia, reveal;
    int c, set, xd, yd, up_in=0, dn_in=0;
@@ -1669,8 +1608,7 @@ int x, y;
  * this character has been obscured. check whether it was an enlarged char
  * and therefor its neighbours have to be redrawn.
  */
-static void updatec(real, x, y)
-int real, x, y;
+static void updatec(int real, int x, int y)
 {
    if(real & ATTR_XDOUBLE)  redrawc(x+1, y);
    if(real & ATTR_YDOUBLE)  redrawc(x, y+1);
@@ -1681,8 +1619,7 @@ int real, x, y;
 /*
  * redraw rectangle of screen (for exposure handling)
  */
-void redraw_screen_rect(x1, y1, x2, y2)
-int x1, y1, x2, y2;
+void redraw_screen_rect(int x1, int y1, int x2, int y2)
 {
    int x, y;
 
@@ -1697,8 +1634,7 @@ int x1, y1, x2, y2;
  * needs to be redisplayed.
  */
 
-static void update_DRCS_display(start, stop, step)
-int start, stop, step;
+static void update_DRCS_display(int start, int stop, int step)
 {
    int x, y, c;
 
@@ -1742,8 +1678,7 @@ static void clearscreen()
 }
 
 
-static void scroll(up)
-int up;
+static void scroll(int up)
 {
    int y, x, savereal[40];
 

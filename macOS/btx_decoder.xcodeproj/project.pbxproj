@@ -32,6 +32,8 @@
 		CCB5A6C021F7B0CB00016DFA /* attrib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = attrib.h; path = ../attrib.h; sourceTree = "<group>"; };
 		CCB5A6C121F7B0CB00016DFA /* protocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = protocol.h; path = ../protocol.h; sourceTree = "<group>"; };
 		CCB5A6C221F7B0CB00016DFA /* control.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = control.h; path = ../control.h; sourceTree = "<group>"; };
+		CCB5A6C621F7BB2E00016DFA /* layer6.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = layer6.h; path = ../layer6.h; sourceTree = "<group>"; };
+		CCB5A6C721F7BB4B00016DFA /* xfont.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = xfont.h; path = ../xfont.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -82,9 +84,11 @@
 				CCB5A6C021F7B0CB00016DFA /* attrib.h */,
 				CCB5A6C221F7B0CB00016DFA /* control.h */,
 				CCB5A6BF21F7B0CB00016DFA /* font.h */,
+				CCB5A6C621F7BB2E00016DFA /* layer6.h */,
 				CCB5A6BD21F7B0CB00016DFA /* layer6.c */,
 				CCB5A6C121F7B0CB00016DFA /* protocol.h */,
 				CCB5A6BC21F7B0CB00016DFA /* rawfont.c */,
+				CCB5A6C721F7BB4B00016DFA /* xfont.h */,
 				CCB5A6BE21F7B0CB00016DFA /* xfont.c */,
 			);
 			name = shared;
