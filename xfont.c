@@ -372,29 +372,6 @@ int x, y, xd, yd;
 }
 
 
-void xclearscreen()
-{
-#if 0
-   extern int tia, rows;
-   int y, bg;
-   
-   if(visible) {
-      if(have_color) {
-	 for(y=0; y<rows; y++) {
-	    bg = tia ? BLACK : 32+4+y;
-	    if(cur_fg!=bg)
-	       { XSetForeground(dpy, gc, colormap[bg].pixel); cur_fg=bg;}
-
-	    XFillRectangle(dpy, btxwin, gc, 0, y*fontheight*pixel_size,
-			   btxwidth, fontheight*pixel_size);
-	 }
-      }
-      else XClearWindow(dpy, btxwin);
-   }
-#endif
-}
-
-
 void xscroll(int upper, int lower, int up)
 {
 #if 0

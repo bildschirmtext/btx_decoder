@@ -1672,9 +1672,10 @@ static void clearscreen()
 	 screen[y][x].mark = 0;
 	 screen[y][x].fg = WHITE;
 	 screen[y][x].bg = TRANSPARENT;
+     redrawc(x+1, y+1);
       }
 
-   xclearscreen();
+//   xclearscreen();
    if(t.cursor_on) xcursor(0, 0);
 }
 
