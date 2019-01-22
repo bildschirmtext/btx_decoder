@@ -1,4 +1,5 @@
-void init_fonts();
+void init_fonts(void);
+void default_colors(void);
 void xputc(int c, int set, int x, int y, int xdouble, int ydouble, int underline, int diacrit, int fg, int bg);
 void xcursor(int x, int y);
 void define_fullrow_bg(int row, int index);

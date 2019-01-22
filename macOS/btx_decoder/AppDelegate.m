@@ -5,6 +5,7 @@
 
 #import "AppDelegate.h"
 #import <QuartzCore/QuartzCore.h>
+#import "xfont.h"
 
 #define MEMIMAGE_SIZE (480*240*3)
 extern unsigned char *memimage;
@@ -50,36 +51,12 @@ static CVReturn renderCallback(CVDisplayLinkRef displayLink,
 }
 
 
-static size_t _getBytesCallback(void *info, void *buffer, off_t position, size_t count) {
-    static const uint8_t colors[4] = { 255, 170, 85, 0 };
-    uint8_t *target = (uint8_t *)buffer;
-    uint8_t *source = ((uint8_t *)info) + position;
-    uint8_t *sourceEnd = source + count;
-    while (source < sourceEnd) {
-        *(target++) = colors[*(source)];
-        source++;
-    }
-    return count;
-}
-
-static void _releaseInfo(void *info) {
-//    free(info);
-}
-
 @implementation View
 
 - (CGImageRef)createGameBoyScreenCGImageRef {
-    CGDataProviderDirectCallbacks callbacks;
-    callbacks.version = 0;
-    callbacks.getBytePointer = NULL;
-    callbacks.releaseBytePointer = NULL;
-    callbacks.getBytesAtPosition = _getBytesCallback;
-    callbacks.releaseInfo = _releaseInfo;
-
-    size_t pictureSize = MEMIMAGE_SIZE;
     uint8_t *pictureCopy = memimage;
 
-    CGDataProviderRef provider = CGDataProviderCreateDirect(pictureCopy, pictureSize, &callbacks);
+    CGDataProviderRef provider = CGDataProviderCreateWithData(NULL, pictureCopy, MEMIMAGE_SIZE, NULL);
     CGColorSpaceRef colorspace = CGColorSpaceCreateDeviceRGB();
 
     CGImageRef image = CGImageCreate(480, 240, 8, 24, 480*3, colorspace, kCGBitmapByteOrderDefault | kCGImageAlphaNone, provider, NULL, NO, kCGRenderingIntentDefault);
@@ -190,8 +167,8 @@ static uint8_t keys;
 
 - (void)applicationDidFinishLaunching:(NSNotification *)notification
 {
-    int scale = 2;
-    [self.window setFrame:CGRectMake(0, 1000, 160 * scale, 144 * scale + 22) display:YES];
+    int scale = 1;
+    [self.window setFrame:CGRectMake(0, 1000, 480 * scale, 240 * scale + 22) display:YES];
 
     CGRect bounds = self.window.contentView.frame;
     bounds.origin = CGPointZero;
@@ -205,13 +182,22 @@ static uint8_t keys;
     textlog = stderr;
     
     init_fonts();
+    default_colors();
     init_layer6();
-    f = fopen("/tmp/1.cept", "r");
+//    char *filename = "/tmp/1.cept";
+//    char *filename = "/Users/mist/Documents/git/bildschirmtext/historic_dumps/PC online 1&1/06MICROS.CPT";
+//    char *filename = "/Users/mist/Documents/git/bildschirmtext/historic_dumps/PC online 1&1/03IBM_1.CPT";
+    char *filename = "/Users/mist/Documents/git/bildschirmtext/historic_dumps/PC online 1&1/18BAHN.CPT";
+//    char *filename = "/Users/mist/Documents/btx/rtx/pages/190912a";
+    f = fopen(filename, "r");
 
     while (!process_BTX_data()) {
 //        printf(".");
     }
 
+    f = fopen("/tmp/memimage.bin", "wb");
+    fwrite(memimage, 1, MEMIMAGE_SIZE, f);
+    fclose(f);
 
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         NSTimeInterval timePerFrame = 1.0 / (1024.0 * 1024.0 / 114.0 / 154.0);
