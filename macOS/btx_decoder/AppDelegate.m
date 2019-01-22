@@ -7,6 +7,13 @@
 #import <QuartzCore/QuartzCore.h>
 #import "xfont.h"
 
+#include <errno.h>
+#include <string.h>
+#include <unistd.h>
+#include <netdb.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+
 #define MEMIMAGE_SIZE (480*240*3)
 extern unsigned char *memimage;
 extern void init_layer6(void);
@@ -15,7 +22,8 @@ FILE *textlog;
 int visible=1;
 
 FILE *f;
-int last_char;
+int sockfd;
+unsigned char last_char;
 bool is_last_char_buffered = false;
 
 int layer2getc()
@@ -23,7 +31,11 @@ int layer2getc()
     if (is_last_char_buffered) {
         is_last_char_buffered = false;
     } else {
-        last_char = fgetc(f);
+        int numbytes = recv(sockfd, &last_char, 1, 0);
+        if (numbytes == -1) {
+            perror("recv");
+            exit(1);
+        }
     }
     return last_char;
 }
@@ -117,43 +129,30 @@ static CVReturn renderCallback(CVDisplayLinkRef displayLink,
     return YES;
 }
 
-static uint8_t keys;
-
-- (uint8_t)keyMaskFromEvent:(NSEvent *)event
+- (void)keyDown:(NSEvent *)event
 {
-    switch ([event.characters characterAtIndex:0]) {
-        case 0xF703: // right
-            return 1;
-        case 0xF702: // left
-            return 2;
-        case 0xF700: // up
-            return 4;
-        case 0xF701: // down
-            return 8;
-        case 'a': // a
-            return 16;
-        case 's': // b
-            return 32;
-        case '\'': // select
-            return 64;
-        case '\r': // start
-            return 128;
+    int c = [event.characters characterAtIndex:0];
+    char c2;
+    NSLog(@"c: 0x%x", c);
+    switch (c) {
+        case 0xf704:
+            c2 = 0x13; // INI
+            break;
+        case 0xf705:
+            c2 = 0x1c; // TER
+            break;
+        case 0xf706:
+            c2 = 0x1a; // DCT
+            break;
         default:
-            return 0;
+            c2 = c;
+    }
+    if (send(sockfd, &c2, 1, 0) == -1){
+        perror("send");
+        exit (1);
     }
 }
 
-- (void)keyDown:(NSEvent *)event
-{
-    keys |= [self keyMaskFromEvent:event];
-//    gb->set_buttons(keys);
-}
-
-- (void)keyUp:(NSEvent *)event
-{
-    keys &= ~[self keyMaskFromEvent:event];
-//    gb->set_buttons(keys);
-}
 
 @end
 
@@ -184,20 +183,33 @@ static uint8_t keys;
     init_fonts();
     default_colors();
     init_layer6();
-//    char *filename = "/tmp/1.cept";
-//    char *filename = "/Users/mist/Documents/git/bildschirmtext/historic_dumps/PC online 1&1/06MICROS.CPT";
-//    char *filename = "/Users/mist/Documents/git/bildschirmtext/historic_dumps/PC online 1&1/03IBM_1.CPT";
-    char *filename = "/Users/mist/Documents/git/bildschirmtext/historic_dumps/PC online 1&1/18BAHN.CPT";
-//    char *filename = "/Users/mist/Documents/btx/rtx/pages/190912a";
-    f = fopen(filename, "r");
 
-    while (!process_BTX_data()) {
-//        printf(".");
+
+#define MAXDATASIZE 100 /* max number of bytes we can get at once */
+    char buf[MAXDATASIZE];
+    struct hostent *he;
+    struct sockaddr_in their_addr; /* connector's address information */
+
+    if ((he=gethostbyname("belgradstr.dyndns.org")) == NULL) {  /* get the host info */
+        herror("gethostbyname");
+        exit(1);
     }
 
-    f = fopen("/tmp/memimage.bin", "wb");
-    fwrite(memimage, 1, MEMIMAGE_SIZE, f);
-    fclose(f);
+    if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+        perror("socket");
+        exit(1);
+    }
+
+    their_addr.sin_family = AF_INET;      /* host byte order */
+    their_addr.sin_port = htons(20000);    /* short, network byte order */
+    their_addr.sin_addr = *((struct in_addr *)he->h_addr);
+    bzero(&(their_addr.sin_zero), 8);     /* zero the rest of the struct */
+
+    if (connect(sockfd, (struct sockaddr *)&their_addr, \
+                sizeof(struct sockaddr)) == -1) {
+        perror("connect");
+        exit(1);
+    }
 
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         NSTimeInterval timePerFrame = 1.0 / (1024.0 * 1024.0 / 114.0 / 154.0);
@@ -205,6 +217,9 @@ static uint8_t keys;
         self.nextFrameTime = [NSDate timeIntervalSinceReferenceDate] + timePerFrame;
 
         for (;;) {
+            if (process_BTX_data()) {
+//                break;
+            }
             if (true /*gb->is_ppu_dirty()*/) {
                 //gb->clear_ppu_dirty();
                 [view updateLayerContents];
