@@ -188,7 +188,7 @@ static CVReturn renderCallback(__unused CVDisplayLinkRef displayLink,
 #else
     CGFloat scale = 1.5;
     CGFloat scaleX = scale * 1;
-    CGFloat scaleY = scale * 1.5; // for a 4:3 aspect ratio
+    CGFloat scaleY = scale * (4.0 / 3.0); // for a 4:3 aspect ratio
 #endif
     [self.window setFrame:CGRectMake(0, 1000, 480 * scaleX, 240 * scaleY + 22) display:YES];
 
