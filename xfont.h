@@ -7,4 +7,4 @@ void free_DRCS(void);
 void define_raw_DRC(int c, char *data, int bits);
 void define_color(unsigned int index, unsigned int r, unsigned int g, unsigned int b);
 void define_DCLUT(int entry, int index);
-void xclearscreen(void);
+void xscroll(int upper, int lower, int up);

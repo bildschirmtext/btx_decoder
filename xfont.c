@@ -150,7 +150,7 @@ struct btxchar *ch, *dia;
 int x, y, xd, yd, ul, fg, bg;
 {
    extern unsigned char *memimage;  /* draw to window or to memory ?? */
-   int i, j, z, s, yy, yyy, xxx, size;
+   int i, j, z, s, yy, yyy, xxx;
 
    if(fg==TRANSPARENT)  fg = 32+4+y;
    if(bg==TRANSPARENT)  bg = 32+4+y;
@@ -185,7 +185,7 @@ int x, y, xd, yd;
 {
    extern unsigned char *memimage;  /* draw to window or to memory ?? */
    extern int tia;
-   int c, i, j, z, s, p, yy, xxx, yyy, colormask, size;
+   int c, i, j, z, s, p, yy, xxx, yyy;
 
    if(memimage) {
       z=y*fontheight;
@@ -246,13 +246,15 @@ void xscroll(int upper, int lower, int up)
 
 void xcursor(int x, int y)
 {
-#if 0
-   extern GC cursorgc;
-   
-   if(visible) XFillRectangle(dpy, btxwin, cursorgc, x*FONT_WIDTH*pixel_size,
-			      y*fontheight*pixel_size,
-			      FONT_WIDTH*pixel_size, fontheight*pixel_size);
-#endif
+   /* this inverts the character at the given location */
+   extern unsigned char *memimage;
+   for (int yy = y * fontheight; yy < y * fontheight + fontheight; yy++) {
+      for (int xx = x * 12; xx < x * 12 + 12; xx++) {
+         memimage[(yy)*480*3 + (xx)*3 + 0] ^= 0xFF;
+         memimage[(yy)*480*3 + (xx)*3 + 1] ^= 0xFF;
+         memimage[(yy)*480*3 + (xx)*3 + 2] ^= 0xFF; 
+      }
+   }
 }
 
 /*

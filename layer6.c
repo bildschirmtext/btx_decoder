@@ -1719,14 +1719,12 @@ static void scroll(int up)
       screen[y][x].bg = TRANSPARENT;
    }
 
-#if 0
    /* remove old cursor */
    if(t.cursor_on && t.cursory>=t.scroll_upper && t.cursory<=t.scroll_lower)
       xcursor(t.cursorx-1, t.cursory-1);
 
    /* scroll */
    xscroll(t.scroll_upper-1, t.scroll_lower-1, up);
-#endif
 
    /* fast scroll the area */
    for(y=t.scroll_upper; y<=t.scroll_lower; y++)
