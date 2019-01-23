@@ -63,22 +63,11 @@ static CVReturn renderCallback(CVDisplayLinkRef displayLink,
 
 @implementation View
 
-- (CGImageRef)createCGImageRef {
-    CGDataProviderRef provider = CGDataProviderCreateWithData(NULL, memimage, 480*240*3, NULL);
-    CGColorSpaceRef colorspace = CGColorSpaceCreateDeviceRGB();
-
-    CGImageRef image = CGImageCreate(480, 240, 8, 24, 480*3, colorspace, kCGBitmapByteOrderDefault | kCGImageAlphaNone, provider, NULL, NO, kCGRenderingIntentDefault);
-    CFRelease(colorspace);
-    CFRelease(provider);
-    return image;
-}
-
 - (id)initWithFrame:(NSRect)frame {
     self = [super initWithFrame:frame];
     if (self) {
         self.layer = [CALayer layer];
         self.wantsLayer = YES;
-        self.layer.magnificationFilter = kCAFilterNearest;
 
         [self setupDisplayLink];
     }
@@ -103,8 +92,14 @@ static CVReturn renderCallback(CVDisplayLinkRef displayLink,
 }
 
 - (void)updateLayerContents {
-    CGImageRef fullScreenImage = [self createCGImageRef];
-    self.nextLayerContents = CFBridgingRelease(fullScreenImage);
+    CGDataProviderRef provider = CGDataProviderCreateWithData(NULL, memimage, 480*240*3, NULL);
+    CGColorSpaceRef colorspace = CGColorSpaceCreateDeviceRGB();
+    
+    CGImageRef image = CGImageCreate(480, 240, 8, 24, 480*3, colorspace, kCGBitmapByteOrderDefault | kCGImageAlphaNone, provider, NULL, NO, kCGRenderingIntentDefault);
+    CFRelease(colorspace);
+    CFRelease(provider);
+
+    self.nextLayerContents = CFBridgingRelease(image);
 }
 
 - (void)swapToNextFrame {
@@ -225,8 +220,14 @@ static CVReturn renderCallback(CVDisplayLinkRef displayLink,
 
 - (void)applicationDidFinishLaunching:(NSNotification *)notification
 {
-    int scale = 2;
-    [self.window setFrame:CGRectMake(0, 1000, 480 * scale, 240 * scale + 22) display:YES];
+#ifdef PIXEL_EXACT
+    CGFloat scale = 1;
+#else
+    CGFloat scale = 1.5;
+    CGFloat scaleX = scale * 1;
+    CGFloat scaleY = scale * 1.5; // for a 4:3 aspect ratio
+#endif
+    [self.window setFrame:CGRectMake(0, 1000, 480 * scaleX, 240 * scaleY + 22) display:YES];
 
     CGRect bounds = self.window.contentView.frame;
     bounds.origin = CGPointZero;
