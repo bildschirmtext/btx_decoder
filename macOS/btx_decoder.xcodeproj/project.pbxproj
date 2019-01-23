@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		CC05D90B21F8F4E60028FE70 /* layer2.c in Sources */ = {isa = PBXBuildFile; fileRef = CC05D90921F8F4E50028FE70 /* layer2.c */; };
 		CCB5A6AC21F7B09B00016DFA /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = CCB5A6AB21F7B09B00016DFA /* AppDelegate.m */; };
 		CCB5A6AE21F7B09C00016DFA /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CCB5A6AD21F7B09C00016DFA /* Assets.xcassets */; };
 		CCB5A6B121F7B09C00016DFA /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = CCB5A6AF21F7B09C00016DFA /* MainMenu.xib */; };
@@ -17,6 +18,9 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		CC05D90921F8F4E50028FE70 /* layer2.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = layer2.c; path = ../layer2.c; sourceTree = "<group>"; };
+		CC05D90A21F8F4E50028FE70 /* layer2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = layer2.h; path = ../layer2.h; sourceTree = "<group>"; };
+		CC05D90C21F8F8760028FE70 /* rawfont.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = rawfont.h; path = ../rawfont.h; sourceTree = "<group>"; };
 		CCB5A6A721F7B09B00016DFA /* btx_decoder.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = btx_decoder.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CCB5A6AA21F7B09B00016DFA /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		CCB5A6AB21F7B09B00016DFA /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -83,8 +87,11 @@
 				CCB5A6C021F7B0CB00016DFA /* attrib.h */,
 				CCB5A6C221F7B0CB00016DFA /* control.h */,
 				CCB5A6BF21F7B0CB00016DFA /* font.h */,
+				CC05D90A21F8F4E50028FE70 /* layer2.h */,
+				CC05D90921F8F4E50028FE70 /* layer2.c */,
 				CCB5A6C621F7BB2E00016DFA /* layer6.h */,
 				CCB5A6BD21F7B0CB00016DFA /* layer6.c */,
+				CC05D90C21F8F8760028FE70 /* rawfont.h */,
 				CCB5A6BC21F7B0CB00016DFA /* rawfont.c */,
 				CCB5A6C721F7BB4B00016DFA /* xfont.h */,
 				CCB5A6BE21F7B0CB00016DFA /* xfont.c */,
@@ -161,6 +168,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CC05D90B21F8F4E60028FE70 /* layer2.c in Sources */,
 				CCB5A6C521F7B0CB00016DFA /* xfont.c in Sources */,
 				CCB5A6C421F7B0CB00016DFA /* layer6.c in Sources */,
 				CCB5A6B421F7B09C00016DFA /* main.m in Sources */,

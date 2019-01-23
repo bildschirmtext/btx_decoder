@@ -38,20 +38,17 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <errno.h>
 #include "layer6.h"
+#include "layer2.h"
 #include "xfont.h"
 #include "control.h"
 #include "font.h"
 #include "attrib.h"
 
-void LOG(const char *format, ...);
-void xbtxerror(int perr, const char *format, ...);
-
-int tia=0, reveal=0;
-
-/* callbacks */
-extern int layer2getc(void);
-extern void layer2ungetc(void);
+// TODO: hook 
+int tia = 0;    /* 1: white-on-black mode, no attributes */
+int reveal = 0; /* 1: show hidden content */
 
 /* exported variables */
 struct screen_cell screen[24][40];   /* information for every character */
@@ -83,6 +80,8 @@ static struct {
 } t, backup;
 
 /* local functions */
+void LOG(const char *format, ...);
+void xbtxerror(int perr, const char *format, ...);
 static void default_sets(void);
 static void do_US(void);
 static int primary_control_C0(int c1);
@@ -554,7 +553,6 @@ static void supplementary_control_C1(int c1, int fullrow)  /* page 121, annex 6 
 
 static void do_US()  /* page 85/86 */
 {
-   extern int server_outfd;
    static unsigned char TFI_string[] = { SOH, US, 0x20, 0x7f, 0x40, ETB };
    int c2, c3, alphamosaic = 0;
 
@@ -573,9 +571,7 @@ static void do_US()  /* page 85/86 */
 	 c3 = layer2getc();
 	 if(c3==0x40) {
 	    LOG("       TFI request\n");
-#if 0 // TODO: interface to communications code
-	    write(server_outfd, TFI_string, 6);
-#endif
+	    layer2write(TFI_string, 6);
 	 }
 	 else {
 	    LOG("       TFI echo 0x%02x\n", c3);
@@ -1539,7 +1535,6 @@ static void output(int c)
 
 static void redrawc(int x, int y)
 {
-   extern int tia, reveal;
    int c, set, xd, yd, up_in=0, dn_in=0;
    unsigned int real, xreal=0, yreal=0, xyreal=0;
 
@@ -1750,13 +1745,12 @@ static void scroll(int up)
 
 void LOG(const char *format, ...)
 {
-   extern FILE *textlog;
-   extern int visible;
+   FILE *textlog = stderr;
 
    va_list args;
    va_start(args, format);
 
-   if(textlog && visible) {
+   if(textlog) {
       vfprintf(textlog, format, args);
       fflush(textlog);
    }
@@ -1764,8 +1758,6 @@ void LOG(const char *format, ...)
 
 void xbtxerror(int perr, const char *format, ...)
 {
-   extern int errno;
-
    va_list args;
    va_start(args, format);
 

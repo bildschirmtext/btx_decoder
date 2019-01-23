@@ -34,8 +34,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "font.h"
+#include "layer6.h"
 #include "attrib.h"
 #include "xfont.h"
+#include "rawfont.h"
 
 struct btxchar {
    struct btxchar *link;    /* NULL: use this char,  else: use linked char */
@@ -53,10 +55,6 @@ typedef struct {
 } color;
 
 unsigned char *memimage = NULL;
-
-extern int scr, btxwidth;
-extern int pixel_size, have_color, visible, fontheight;
-extern char raw_font[];
 
 /* local variables */
 static struct btxchar btx_font[6*96];
@@ -116,10 +114,9 @@ void init_fonts()
 
 void xputc(int c, int set, int x, int y, int xdouble, int ydouble, int underline, int diacrit, int fg, int bg)
 {
-   extern int rows;
    struct btxchar *ch, *dia;
    
-   if(!visible || x<0 || y<0 || x>39 || y>rows-1) return;
+   if(x<0 || y<0 || x>39 || y>rows-1) return;
 
    ch = btx_font + set*96 + c - 0x20;
    
@@ -179,7 +176,6 @@ static void xdraw_multicolor_char(ch, x, y, xd, yd)
 struct btxchar *ch;
 int x, y, xd, yd;
 {
-   extern int tia;
    int c, i, j, z, s, p, yy, xxx, yyy;
 
    z=y*fontheight;

@@ -8,41 +8,7 @@
 #import "xfont.h"
 #import "layer6.h"
 #import "control.h"
-
-#include <errno.h>
-#include <string.h>
-#include <unistd.h>
-#include <netdb.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-
-FILE *textlog = NULL;
-int visible=1;
-
-FILE *f;
-int sockfd;
-unsigned char last_char;
-bool is_last_char_buffered = false;
-
-int layer2getc()
-{
-    if (is_last_char_buffered) {
-        is_last_char_buffered = false;
-    } else {
-        ssize_t numbytes = recv(sockfd, &last_char, 1, 0);
-        if (numbytes == -1) {
-            perror("recv");
-            exit(1);
-        }
-    }
-    return last_char;
-}
-
-void layer2ungetc()
-{
-    is_last_char_buffered = true;
-}
-
+#import "layer2.h"
 
 @interface View : NSView
 
@@ -126,7 +92,7 @@ static CVReturn renderCallback(CVDisplayLinkRef displayLink,
         return;
     }
     int ch = [event.characters characterAtIndex:0];
-    char c[3];
+    unsigned char c[3];
     int len = 1;
     NSLog(@"c: 0x%x", ch);
     switch (ch) {
@@ -201,10 +167,7 @@ static CVReturn renderCallback(CVDisplayLinkRef displayLink,
         default:
             c[0] = ch;
     }
-    if (send(sockfd, c, len, 0) == -1){
-        perror("send");
-        exit (1);
-    }
+    layer2write(c, len);
 }
 
 
@@ -236,36 +199,13 @@ static CVReturn renderCallback(CVDisplayLinkRef displayLink,
     [self.window.contentView setAutoresizesSubviews:YES];
     [self.window.contentView addSubview:view];
     [self.window makeFirstResponder:view];
-
-//    textlog = stderr;
     
+    // initialize decoder
     init_xfont();
     init_layer6();
 
-    struct hostent *he;
-    struct sockaddr_in their_addr;
-
-    if ((he=gethostbyname("belgradstr.dyndns.org")) == NULL) {
-        herror("gethostbyname");
-        exit(1);
-    }
-
-    if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
-        perror("socket");
-        exit(1);
-    }
-
-    their_addr.sin_family = AF_INET;
-    their_addr.sin_port = htons(20000);
-    their_addr.sin_addr = *((struct in_addr *)he->h_addr);
-    bzero(&(their_addr.sin_zero), 8);
-
-    if (connect(sockfd, (struct sockaddr *)&their_addr, \
-                sizeof(struct sockaddr)) == -1) {
-        perror("connect");
-        exit(1);
-    }
-
+    connect_to_service();
+    
     // Thread 1: Decoder    
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         for (;;) {
