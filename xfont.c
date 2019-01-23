@@ -33,9 +33,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#if 0
-#include <X11/Xlib.h>
-#endif
 #include "font.h"
 #include "attrib.h"
 #include "xfont.h"
@@ -44,55 +41,30 @@ struct btxchar {
    struct btxchar *link;    /* NULL: use this char,  else: use linked char */
    char *raw;               /* pointer to raw font data */
    char bits;               /* depth in case of DRC */
-#if 0
-   Pixmap map[4];           /* 0: normal   (index = yd*2+xd) */
-#endif
-
-};                          /* 1: xdouble  */
+};                          /* 0: normal   (index = yd*2+xd) */
+                            /* 1: xdouble  */
                             /* 2: ydouble  */
                             /* 3: xydouble */
 
-#if 1
 typedef struct {
    int red;
    int green;
    int blue;
-   int pixel;
-   int flags;
 } XColor;
-enum {
-   DoRed = 1,
-   DoGreen = 2,
-   DoBlue = 4,
-};
-#endif
-#if 0
-extern Display  *dpy;
-extern Window   btxwin;
-extern GC       gc;
-extern Colormap cmap;
-#endif
+
 extern int      scr, btxwidth;
 extern int pixel_size, have_color, visible, fontheight;
 extern char raw_font[];
 
 /* local variables */
-static char tmpdata[2*FONT_HEIGHT*2*2*2*2], tmpraw[2*FONT_HEIGHT];
 static struct btxchar btx_font[6*96];
 static int fullrow_bg[24];        /* fullrow background color for eacch row */
 static int dclut[4];              /* map the 4-color DRC's */
 static XColor colormap[32+4+24];  /* store pixel value for each colorcell */
-static int cur_fg = -1, cur_bg = -1;
 
 /* local functions */
-#if 0
-static Pixmap createpixmapfromfont();
-#endif
 static void xdraw_normal_char(struct btxchar *ch, int x, int y, int xd, int yd, int ul, struct btxchar *dia, int fg, int bg);
 static void xdraw_multicolor_char(struct btxchar *ch, int x, int y, int xd, int yd);
-static void make_stipple(char *src, char *dst, int mask);
-static void rawfont2bitmap(char *src, char *dst, int xzoom, int yzoom);
-static void store_colors(void);
 static void init_colormap(void);
 
 
@@ -105,17 +77,13 @@ void init_fonts()
    static char raw_del[] = { 0x3f, 0x3f, 0x3f, 0x3f, 0x3f, 0x3f, 0x3f, 0x3f,
 			     0x3f, 0x3f, 0x3f, 0x3f, 0x3f, 0x3f, 0x3f, 0x3f,
 			     0x3f, 0x3f, 0x3f, 0x3f, 0x3f, 0x3f, 0x3f, 0x3f };
-   int n, i;
+   int n;
 
    /* primary graphic, 2nd suppl. mosaic, suppl. graphic, 3rd suppl. mosaic */
    for(n=0; n<4*96; n++) {
       btx_font[n].raw  = raw_font+n*2*FONT_HEIGHT;
       btx_font[n].bits = 1;
       btx_font[n].link = NULL;
-#if 0
-      for(i=0; i<4; i++)  btx_font[n].map[i] = NULL;
-#endif
-
    }
    
    /* link chars into '1st supplementary mosaic' (L) set */
@@ -129,9 +97,6 @@ void init_fonts()
    btx_font[L*96+0x7f-0x20].link = NULL;
    btx_font[L*96+0x7f-0x20].raw = raw_del;
    btx_font[L*96+0x7f-0x20].bits = 1;
-#if 0
-   for(i=0; i<4; i++)  btx_font[L*96+0x7f-0x20].map[i] = NULL;
-#endif
 
    /* initialize DRCS font to all NULL's */
    btx_font[DRCS*96+0].link = btx_font;    /* link 'SPACE' */
@@ -139,10 +104,6 @@ void init_fonts()
       btx_font[DRCS*96+n].bits = 0;
       btx_font[DRCS*96+n].raw  = NULL;
       btx_font[DRCS*96+n].link = NULL;
-#if 0
-      for(i=0; i<4; i++)  btx_font[DRCS*96+n].map[i] = NULL;
-#endif
-
    }
 }
 
@@ -417,131 +378,6 @@ void xcursor(int x, int y)
 #endif
 }
 
-
-/*
- * set bits in dst for each color in src that has a bit set to 1 in mask 
- */
-static void make_stipple(src, dst, mask)
-char *src, *dst;
-int mask;
-{
-   int c, i, y;
-
-   for(y=0; y<2*FONT_HEIGHT; y++) {
-      *dst = 0;
-      for(i=5; i>=0; i--) {
-	 c = ((*src & (1<<i))>0) + ((*(src+2*FONT_HEIGHT) & (1<<i))>0)*2;
-	 if(mask & (1<<c))  *dst |= (1<<i);
-      }
-      src++; dst++;
-   }
-}
-
-
-#if 0
-/*
- * converts the BTX font (src) to X11 bitmap data (dst).
- * The xzoom and yzoom parameters specify the stretching factor in x and
- * y direction. Make sure that you have allocated enough memory at dst !
- */
-
-static void rawfont2bitmap(src, dst, xzoom, yzoom)
-char *src, *dst;
-int xzoom, yzoom;
-{
-#define MAXDATA 16
-#define addbit(x) { byte = bitindex/8; \
-                    if(x) data[byte] |= 1 << 7-bitindex%8; \
-                    bitindex++; }
-
-   int x, y, i, j, k, bitindex, byte;
-   static char data[MAXDATA];
-   char c;
-
-   for(y=0; y<FONT_HEIGHT; y++) {
-      for(i=0; i<MAXDATA; i++) data[i] = 0;
-      bitindex = 0;
-
-      /* extract and x-stretch font into data field  (12 bit !) */
-      for(k=0; k<2; k++) {
-	 for(x=5; x>=0; x--)
-            for(j=0; j<xzoom; j++) addbit(*src & (1<<x));
-	 src++;
-      }
-
-      /* reverse data field for bitmap format */
-      for(i=0; i<=byte; i++) {
-         c = data[i];
-         data[i] = 0;
-         for(j=0; j<=7; j++)  if(c & 1<<j) data[i] |= 1<<7-j;
-      }
-
-      /* copy and y-stretch data into dst */
-      for(j=0; j<yzoom; j++)
-         for(i=0; i<=byte; i++)  *dst++ = data[i];
-   }
-}
-#endif
-
-#if 0
-/*
- * create and initialize pixmap with font data 'src'.
- * 4 bit (16 color) DRC's are mapped to colormap entries 16-31.
- * 2 bit (4  color) DRC's are mapped to colormap entries 32-35 (DCLUT).
- */
-static Pixmap createpixmapfromfont(src, xzoom, yzoom, bits)
-char *src;
-int xzoom, yzoom, bits;
-{
-   static char data[FONT_HEIGHT*2*2*FONT_WIDTH*2*2], row[FONT_WIDTH*2*2];
-   char *d = data;
-   int c, i, j, k, l, x, y, byteindex;
-   XImage *image;
-   Pixmap pix;
-
-   pix = XCreatePixmap(dpy, btxwin, FONT_WIDTH*xzoom,
-		       FONT_HEIGHT*yzoom, DefaultDepth(dpy, scr));
-
-   image = XCreateImage(dpy, DefaultVisual(dpy, scr), DefaultDepth(dpy, scr),
-			ZPixmap, 0, (char *) data, xzoom*FONT_WIDTH,
-			yzoom*FONT_HEIGHT, 8, 0);
-
-   for(y=0; y<FONT_HEIGHT; y++) {
-      byteindex = 0;
-      for(l=0; l<2; l++) {
-	 for(x=5; x>=0; x--) {
-	    for(c=0, k=0; k<bits; k++)
-               if(*(src+k*FONT_HEIGHT*2) & (1<<x) )  c |= 1<<k;
-	    for(j=0; j<xzoom; j++)
-	       row[byteindex++] =
-	          bits==4 ? colormap[c+16].pixel : colormap[c+32].pixel;
-	 }
-	 src++;
-      }
-      
-      for(j=0; j<yzoom; j++)
-         for(i=0; i<byteindex; i++)  *d++ = row[i];
-   }
-
-   XPutImage(dpy, pix, gc, image, 0, 0, 0, 0,
-	     xzoom*FONT_WIDTH, yzoom*FONT_HEIGHT);
-   
-   /* Note that when the image is created using XCreateImage, the destroy
-    * procedure that the XDestroyImage function calls frees both the image
-    * structure and the data pointed to by the image structure.
-    *
-    * The free() function causes the space pointed to by ptr to be deallocated,
-    * that is, made available for further allocation.  If ptr is a null point-
-    * er, no action occurs.
-    */
-   image->data = NULL;
-   
-   XDestroyImage(image);
-
-   return pix;
-}
-#endif
-
 /*
  * defines the raw bitmap data for a DRC 'c'. If 'c' was in use before,
  * its old raw data and Pixmaps are freed. No Pixmap for any state is
@@ -554,13 +390,6 @@ void define_raw_DRC(int c, char *data, int bits)
    int n;
    
    if(ch->raw)  free(ch->raw);
-   for(n=0; n<4; n++)
-#if 0
-      if(ch->map[n]) {
-	 XFreePixmap(dpy, ch->map[n]);
-	 ch->map[n] = NULL;
-      }
-#endif
 
    if(! (ch->raw = malloc(2*FONT_HEIGHT*bits)) ) {
       perror("XCEPT: no mem for raw DRCS");
@@ -579,7 +408,7 @@ void define_raw_DRC(int c, char *data, int bits)
  */
 void free_DRCS()
 {
-   int i, n;
+   int n;
    
    btx_font[DRCS*96+0].link = btx_font;    /* link 'SPACE' */
    for(n=DRCS*96+1; n<(DRCS+1)*96; n++) {
@@ -587,68 +416,9 @@ void free_DRCS()
 	 free(btx_font[n].raw);
 	 btx_font[n].raw = NULL;
       }
-      for(i=0; i<4; i++)
-#if 0
-         if(btx_font[n].map[i]) {
-	    XFreePixmap(dpy, btx_font[n].map[i]);
-	    btx_font[n].map[i] = NULL;
-	 }
-#endif
       btx_font[n].link = NULL;
       btx_font[n].bits = 0;
    }
-}
-
-
-/*
- * free ALL defined font pixmaps (for change of window size).
- */
-void free_font_pixmaps()
-{
-   int i, n;
-   
-#if 0
-   for(n=0; n<6*96; n++)
-      if(!btx_font[n].link)
-         for(i=0; i<4; i++)
-            if(btx_font[n].map[i]) {
-	       XFreePixmap(dpy, btx_font[n].map[i]);
-	       btx_font[n].map[i] = NULL;
-	    }
-#endif
-}
-
-   
-/*
- * try to allocate the colors:  15 shareable read only color cells +
- *                              16 read/write color cells +
- *                               4 read/write  " for DCLUT mapping +
- *    (for better performance)  24 read/write  " for fullrow_bg colors
- */
-void alloc_colors()
-{
-#if 0
-   int n;
-   unsigned long planemasks[1], pixelvals[16+4+24];
-
-   /* allocate colormap entries 0-15 read only  (8 == TRANSPARENT !) */
-   /* colormap has to be already initialized by init_colormap()      */
-   for(n=0; n<16; n++) {
-      if(n==8)  { colormap[n] = colormap[0]; continue; }
-      if(have_color)
-         if( !XAllocColor(dpy, cmap, &colormap[n]) )  have_color = 0;
-   }
-
-   /* allocate colormap entries 16-31 and DCLUT entries 0-3
-      and fullrow_bg's 0-23 read/write */
-   if(have_color && XAllocColorCells(dpy, cmap, False,
-				     planemasks, 0, pixelvals, 16+4+24) ) {
-      for(n=0; n<16+4+24; n++) colormap[16+n].pixel = pixelvals[n];
-   }
-   else have_color = 0;
-#endif
-
-   store_colors();
 }
 
 
@@ -658,29 +428,6 @@ void alloc_colors()
 void default_colors()   /* page 153 */
 {
    init_colormap();
-   store_colors();
-}
-
-
-/*
- * load X colors with values in colormap (only the read/write cells !)
- */
-static void store_colors()
-{
-#if 0
-   int n;
-
-   if(visible && have_color) {
-      for(n=0; n<8; n++) {
-	 XStoreColor(dpy, cmap, &colormap[n+16]);  /* clut 2 */
-	 XStoreColor(dpy, cmap, &colormap[n+24]);  /* clut 3 */
-      }
-
-      for(n=0; n<4; n++)  XStoreColor(dpy, cmap, colormap+32+n); /* dclut */
-      for(n=0; n<24; n++) XStoreColor(dpy, cmap, colormap+32+4+n);
-   }
-#endif
-
 }
 
 
@@ -697,7 +444,6 @@ static void init_colormap()
       colormap[n].red   = ((n&1)>0) ? ( ((n&8)==0) ? 0xffff : 0x7fff ) : 0;
       colormap[n].green = ((n&2)>0) ? ( ((n&8)==0) ? 0xffff : 0x7fff ) : 0;
       colormap[n].blue  = ((n&4)>0) ? ( ((n&8)==0) ? 0xffff : 0x7fff ) : 0;
-      colormap[n].flags = DoRed | DoGreen | DoBlue;
    }
 
    /* clut 2 + clut 3 */
@@ -705,7 +451,6 @@ static void init_colormap()
       colormap[n+16].red   = colormap[n+24].red   = n&1 ? 0xffff : 0;
       colormap[n+16].green = colormap[n+24].green = n&2 ? 0xffff : 0;
       colormap[n+16].blue  = colormap[n+24].blue  = n&4 ? 0xffff : 0;
-      colormap[n+16].flags = colormap[n+24].flags = DoRed | DoGreen | DoBlue;
    }
 
    /* DCLUT */
@@ -713,7 +458,6 @@ static void init_colormap()
       colormap[32+n].red   = colormap[n].red;
       colormap[32+n].green = colormap[n].green;
       colormap[32+n].blue  = colormap[n].blue;
-      colormap[32+n].flags = DoRed | DoGreen | DoBlue;
       dclut[n] = n;
    }
 
@@ -722,7 +466,6 @@ static void init_colormap()
       colormap[32+4+n].red   = colormap[0].red;
       colormap[32+4+n].green = colormap[0].green;
       colormap[32+4+n].blue  = colormap[0].blue;
-      colormap[32+4+n].flags = DoRed | DoGreen | DoBlue;
       fullrow_bg[n] = 0;
    }
 }
@@ -738,10 +481,6 @@ void define_color(unsigned int index, unsigned int r, unsigned int g, unsigned i
    colormap[index].red   = r << 12;
    colormap[index].green = g << 12;
    colormap[index].blue  = b << 12;
-   colormap[index].flags = DoRed | DoGreen | DoBlue;
-#if 0
-   if(visible && have_color) XStoreColor(dpy, cmap, colormap+index);
-#endif
 
    /* if DCLUT contains this color, change DCLUT color too */
    for(i=0; i<4; i++)
@@ -763,10 +502,6 @@ int entry, index;
    colormap[32+entry].red   = colormap[index].red;
    colormap[32+entry].green = colormap[index].green;
    colormap[32+entry].blue  = colormap[index].blue;
-   colormap[32+entry].flags = colormap[index].flags;
-#if 0
-   if(visible && have_color) XStoreColor(dpy, cmap, colormap+32+entry);
-#endif
 }
 
 
@@ -780,8 +515,4 @@ int row, index;
    colormap[32+4+row].red   = colormap[index].red;
    colormap[32+4+row].green = colormap[index].green;
    colormap[32+4+row].blue  = colormap[index].blue;
-   colormap[32+4+row].flags = colormap[index].flags;
-#if 0
-   if(visible && have_color) XStoreColor(dpy, cmap, colormap+32+4+row);
-#endif
 }

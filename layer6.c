@@ -193,15 +193,17 @@ static void move_cursor(int cmd, int y, int x)
    /* move & wrap */
    switch(cmd) {
       case APF:
-         if(++t.cursorx > 40)
+         if(++t.cursorx > 40) {
 	    if(t.wrap) { t.cursorx-=40; down=1; }
-        else       { t.cursorx=40; }
+            else       { t.cursorx=40; }
+         }
 	 break;
 	 
       case APB:
-	 if(--t.cursorx < 1)
+         if(--t.cursorx < 1) {
 	    if(t.wrap) { t.cursorx+=40; up=1; }
-        else       { t.cursorx=1; }
+            else       { t.cursorx=1; }
+         }
 	 break;
 	 
       case APU:  up=1;         break;
@@ -233,9 +235,10 @@ static void move_cursor(int cmd, int y, int x)
       if(t.scroll_area && t.scroll_impl &&
 	 t.cursory == t.scroll_upper)  scroll(0);
       else
-         if(--t.cursory < 1)
+         if(--t.cursory < 1) {
 	    if(t.wrap)  t.cursory += rows;
 	    else        t.cursory  = 1;
+         }
    }
    
    if(down) {
@@ -243,9 +246,10 @@ static void move_cursor(int cmd, int y, int x)
       if(t.scroll_area && t.scroll_impl &&
 	 t.cursory == t.scroll_lower)  scroll(1);
       else
-         if(++t.cursory > rows)
+         if(++t.cursory > rows) {
 	    if(t.wrap)  t.cursory -= rows;
 	    else        t.cursory  = rows;
+         }
    }
 
    /* draw new cursor */
@@ -387,7 +391,7 @@ static int primary_control_C0(int c1)  /* page 118, annex 6 */
 
 static void supplementary_control_C1(int c1, int fullrow)  /* page 121, annex 6 */
 {
-   int adv, mode = fullrow ? 2 : t.serialmode;
+   int adv = 0, mode = fullrow ? 2 : t.serialmode;
 
    switch(c1) {
                      /* serial   parallel */
@@ -531,9 +535,10 @@ static void supplementary_control_C1(int c1, int fullrow)  /* page 121, annex 6 
    }
 
    /* serial attribute controls advance cursor 1 char forwards !  (page 90) */
-   if(mode==1 && (c1!=CSI || adv) )
+   if(mode==1 && (c1!=CSI || adv) ) {
       if(t.hold_mosaic)  output(t.lastchar);  /* HMS/RMS (page 96) */
       else               move_cursor(APF, -1, -1);
+   }
 }
 
 
@@ -558,7 +563,7 @@ static void do_US()  /* page 85/86 */
 	 c3 = layer2getc();
 	 if(c3==0x40) {
 	    LOG("       TFI request\n");
-#if 0
+#if 0 // TODO: interface to communications code
 	    write(server_outfd, TFI_string, 6);
 #endif
 	 }
@@ -1523,7 +1528,7 @@ static void redrawc(int x, int y)
 {
    extern int tia, reveal;
    int c, set, xd, yd, up_in=0, dn_in=0;
-   unsigned int real, xreal, yreal, xyreal;
+   unsigned int real, xreal=0, yreal=0, xyreal=0;
 
    if(tia) {
       xputc(screen[y-1][x-1].chr&0x7f, screen[y-1][x-1].set, x-1, y-1,

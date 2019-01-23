@@ -25,9 +25,9 @@
 		CCB5A6B221F7B09C00016DFA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		CCB5A6B321F7B09C00016DFA /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		CCB5A6B521F7B09C00016DFA /* btx_decoder.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = btx_decoder.entitlements; sourceTree = "<group>"; };
-		CCB5A6BC21F7B0CB00016DFA /* rawfont.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = rawfont.c; path = ../rawfont.c; sourceTree = "<group>"; };
-		CCB5A6BD21F7B0CB00016DFA /* layer6.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = layer6.c; path = ../layer6.c; sourceTree = "<group>"; };
-		CCB5A6BE21F7B0CB00016DFA /* xfont.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = xfont.c; path = ../xfont.c; sourceTree = "<group>"; };
+		CCB5A6BC21F7B0CB00016DFA /* rawfont.c */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 3; lastKnownFileType = sourcecode.c.c; name = rawfont.c; path = ../rawfont.c; sourceTree = "<group>"; tabWidth = 8; };
+		CCB5A6BD21F7B0CB00016DFA /* layer6.c */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 3; lastKnownFileType = sourcecode.c.c; name = layer6.c; path = ../layer6.c; sourceTree = "<group>"; tabWidth = 8; };
+		CCB5A6BE21F7B0CB00016DFA /* xfont.c */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 3; lastKnownFileType = sourcecode.c.c; name = xfont.c; path = ../xfont.c; sourceTree = "<group>"; tabWidth = 8; };
 		CCB5A6BF21F7B0CB00016DFA /* font.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = font.h; path = ../font.h; sourceTree = "<group>"; };
 		CCB5A6C021F7B0CB00016DFA /* attrib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = attrib.h; path = ../attrib.h; sourceTree = "<group>"; };
 		CCB5A6C121F7B0CB00016DFA /* protocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = protocol.h; path = ../protocol.h; sourceTree = "<group>"; };
