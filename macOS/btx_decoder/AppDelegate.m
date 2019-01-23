@@ -31,7 +31,7 @@ int layer2getc()
     if (is_last_char_buffered) {
         is_last_char_buffered = false;
     } else {
-        int numbytes = recv(sockfd, &last_char, 1, 0);
+        ssize_t numbytes = recv(sockfd, &last_char, 1, 0);
         if (numbytes == -1) {
             perror("recv");
             exit(1);
@@ -144,6 +144,13 @@ static CVReturn renderCallback(CVDisplayLinkRef displayLink,
         case 0xf706:
             c2 = 0x1a; // DCT
             break;
+        case 0x7f:
+            c2 = 0x08; // backspace
+            send(sockfd, &c2, 1, 0);
+            c2 = 0x20; // space
+            send(sockfd, &c2, 1, 0);
+            c2 = 0x08; // backspace
+            break;
         default:
             c2 = c;
     }
@@ -166,7 +173,7 @@ static CVReturn renderCallback(CVDisplayLinkRef displayLink,
 
 - (void)applicationDidFinishLaunching:(NSNotification *)notification
 {
-    int scale = 1;
+    int scale = 2;
     [self.window setFrame:CGRectMake(0, 1000, 480 * scale, 240 * scale + 22) display:YES];
 
     CGRect bounds = self.window.contentView.frame;
@@ -185,12 +192,10 @@ static CVReturn renderCallback(CVDisplayLinkRef displayLink,
     init_layer6();
 
 
-#define MAXDATASIZE 100 /* max number of bytes we can get at once */
-    char buf[MAXDATASIZE];
     struct hostent *he;
-    struct sockaddr_in their_addr; /* connector's address information */
+    struct sockaddr_in their_addr;
 
-    if ((he=gethostbyname("belgradstr.dyndns.org")) == NULL) {  /* get the host info */
+    if ((he=gethostbyname("belgradstr.dyndns.org")) == NULL) {
         herror("gethostbyname");
         exit(1);
     }
@@ -200,10 +205,10 @@ static CVReturn renderCallback(CVDisplayLinkRef displayLink,
         exit(1);
     }
 
-    their_addr.sin_family = AF_INET;      /* host byte order */
-    their_addr.sin_port = htons(20000);    /* short, network byte order */
+    their_addr.sin_family = AF_INET;
+    their_addr.sin_port = htons(20000);
     their_addr.sin_addr = *((struct in_addr *)he->h_addr);
-    bzero(&(their_addr.sin_zero), 8);     /* zero the rest of the struct */
+    bzero(&(their_addr.sin_zero), 8);
 
     if (connect(sockfd, (struct sockaddr *)&their_addr, \
                 sizeof(struct sockaddr)) == -1) {
