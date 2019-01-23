@@ -43,7 +43,6 @@
 #include "control.h"
 #include "font.h"
 #include "attrib.h"
-#include "protocol.h"
 
 void LOG(const char *format, ...);
 void xbtxerror(int perr, const char *format, ...);

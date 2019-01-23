@@ -7,6 +7,7 @@
 #import <QuartzCore/QuartzCore.h>
 #import "xfont.h"
 #import "layer6.h"
+#import "control.h"
 
 #include <errno.h>
 #include <string.h>
@@ -126,30 +127,86 @@ static CVReturn renderCallback(CVDisplayLinkRef displayLink,
 
 - (void)keyDown:(NSEvent *)event
 {
-    int c = [event.characters characterAtIndex:0];
-    char c2;
-    NSLog(@"c: 0x%x", c);
-    switch (c) {
-        case 0xf704:
-            c2 = 0x13; // INI
+    if (!event.characters.length) {
+        return;
+    }
+    int ch = [event.characters characterAtIndex:0];
+    char c[3];
+    int len = 1;
+    NSLog(@"c: 0x%x", ch);
+    switch (ch) {
+        case NSUpArrowFunctionKey:
+            c[0] = APU;
             break;
-        case 0xf705:
-            c2 = 0x1c; // TER
+        case NSDownArrowFunctionKey:
+            c[0] = APD;
             break;
-        case 0xf706:
-            c2 = 0x1a; // DCT
+        case NSLeftArrowFunctionKey:
+            c[0] = APB;
             break;
-        case 0x7f:
-            c2 = 0x08; // backspace
-            send(sockfd, &c2, 1, 0);
-            c2 = 0x20; // space
-            send(sockfd, &c2, 1, 0);
-            c2 = 0x08; // backspace
+        case NSRightArrowFunctionKey:
+            c[0] = APF;
+            break;
+        case NSF1FunctionKey:
+            c[0] = INI;
+            break;
+        case NSF2FunctionKey:
+            c[0] = TER;
+            break;
+        case NSF3FunctionKey:
+            c[0] = DCT;
+            break;
+        case 0x7f: // backspace
+            c[0] = APB;
+            c[1] = ' ';
+            c[2] = APB;
+            len = 3;
+            break;
+        case 0xc4: // 'Ä'
+            c[0] = SS2;
+            c[1] = 'H';
+            c[2] = 'A';
+            len = 3;
+            break;
+        case 0xd6: // 'Ö'
+            c[0] = SS2;
+            c[1] = 'H';
+            c[2] = 'O';
+            len = 3;
+            break;
+        case 0xdc: // 'Ü'
+            c[0] = SS2;
+            c[1] = 'H';
+            c[2] = 'U';
+            len = 3;
+            break;
+        case 0xdf: // 'ß'
+            c[0] = SS2;
+            c[1] = '{';
+            len = 2;
+            break;
+        case 0xe4: // 'ä'
+            c[0] = SS2;
+            c[1] = 'H';
+            c[2] = 'a';
+            len = 3;
+            break;
+        case 0xf6: // 'ö'
+            c[0] = SS2;
+            c[1] = 'H';
+            c[2] = 'o';
+            len = 3;
+            break;
+        case 0xfc: // 'ü'
+            c[0] = SS2;
+            c[1] = 'H';
+            c[2] = 'u';
+            len = 3;
             break;
         default:
-            c2 = c;
+            c[0] = ch;
     }
-    if (send(sockfd, &c2, 1, 0) == -1){
+    if (send(sockfd, c, len, 0) == -1){
         perror("send");
         exit (1);
     }
