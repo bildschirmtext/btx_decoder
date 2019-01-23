@@ -151,9 +151,6 @@ int x, y, xd, yd, ul, fg, bg;
 {
    extern unsigned char *memimage;  /* draw to window or to memory ?? */
    int i, j, z, s, yy, yyy, xxx, size;
-#if 0
-   XGCValues gcv;
-#endif
 
    if(fg==TRANSPARENT)  fg = 32+4+y;
    if(bg==TRANSPARENT)  bg = 32+4+y;
@@ -179,64 +176,6 @@ int x, y, xd, yd, ul, fg, bg;
 	       set_mem(x*FONT_WIDTH+xxx,
 		       y*fontheight+(fontheight-1)*(yd+1)+yyy, fg);
    }
-#if 0
-   else {  /* draw to btx window */
-      size = yd*2 + xd;
-      /* Pixmap not available in this size, create it */
-      if(!ch->map[size]) {
-	 rawfont2bitmap(ch->raw, tmpdata, pixel_size*(xd+1),
-			pixel_size*(yd+1) );
-	 ch->map[size] =
-            XCreateBitmapFromData(dpy, btxwin, tmpdata,
-				  FONT_WIDTH*pixel_size*(xd+1),
-				  FONT_HEIGHT*pixel_size*(yd+1));
-      }
-
-      /* set colors */
-      if(have_color) {
-	 if(cur_fg!=fg)
-	    { XSetForeground(dpy, gc, colormap[fg].pixel); cur_fg=fg; }
-	 if(cur_bg!=bg)
-	    { XSetBackground(dpy, gc, colormap[bg].pixel); cur_bg=bg; }
-      }
-
-      /* draw character */
-      XCopyPlane(dpy, ch->map[size], btxwin, gc, 0, 0,
-		 FONT_WIDTH*pixel_size*(xd+1),
-		 fontheight*pixel_size*(yd+1),
-		 x*FONT_WIDTH*pixel_size, y*fontheight*pixel_size, 1L);
-
-      if(dia) {
-	 /* Pixmap of diacritical mark not available in this size, create it */
-	 if(!dia->map[size]) {
-	    rawfont2bitmap(dia->raw, tmpdata, pixel_size*(xd+1),
-			   pixel_size*(yd+1) );
-	    dia->map[size] =
-	       XCreateBitmapFromData(dpy, btxwin, tmpdata,
-				     FONT_WIDTH*pixel_size*(xd+1),
-				     FONT_HEIGHT*pixel_size*(yd+1));
-	 }
-
-	 /* adjust GC and draw the diacritical mark (fill stippled) */
-	 gcv.stipple = dia->map[size];
-	 gcv.ts_x_origin = x*FONT_WIDTH*pixel_size;
-	 gcv.ts_y_origin = y*fontheight*pixel_size;
-	 gcv.fill_style = FillStippled;
-	 XChangeGC(dpy, gc, GCStipple | GCTileStipXOrigin | GCTileStipYOrigin |
-		   GCFillStyle, &gcv);
-	 XFillRectangle(dpy, btxwin, gc, x*FONT_WIDTH*pixel_size,
-			y*fontheight*pixel_size,
-			FONT_WIDTH*pixel_size*(xd+1),
-			fontheight*pixel_size*(yd+1) );
-	 XSetFillStyle(dpy, gc, FillSolid);
-      }
-
-      if(ul)
-         XFillRectangle(dpy, btxwin, gc, x*FONT_WIDTH*pixel_size,
-	    y*fontheight*pixel_size+(fontheight-1)*pixel_size*(yd+1),
-            FONT_WIDTH*pixel_size*(xd+1), pixel_size*(yd+1) );
-   }
-#endif
 }
 
 
@@ -247,9 +186,6 @@ int x, y, xd, yd;
    extern unsigned char *memimage;  /* draw to window or to memory ?? */
    extern int tia;
    int c, i, j, z, s, p, yy, xxx, yyy, colormask, size;
-#if 0
-   XGCValues gcv;
-#endif
 
    if(memimage) {
       z=y*fontheight;
@@ -271,65 +207,6 @@ int x, y, xd, yd;
 	 }
       }
    }
-#if 0
-   else {  /* draw to btx window */
-      colormask = 0;
-      size = yd*2 + xd;
-      if(!ch->map[size]) {
-	 ch->map[size] =
-            createpixmapfromfont(ch->raw, pixel_size*(xd+1),
-				 pixel_size*(yd+1), ch->bits );
-      }
-
-      if(tia || !have_color) {
-	 if(have_color) {
-	    if(cur_fg!=WHITE)
-	    { XSetForeground(dpy, gc, colormap[WHITE].pixel); cur_fg=WHITE; }
-	    if(cur_bg!=BLACK)
-	    { XSetBackground(dpy, gc, colormap[BLACK].pixel); cur_bg=BLACK; }
-	 }
-	 XCopyPlane(dpy, ch->map[size], btxwin, gc, 0, 0,
-		    FONT_WIDTH*pixel_size*(xd+1),
-		    fontheight*pixel_size*(yd+1),
-		    x*FONT_WIDTH*pixel_size, y*fontheight*pixel_size, 1L);
-      }
-      else {
-	 XCopyArea(dpy, ch->map[size], btxwin, gc, 0, 0,
-		   FONT_WIDTH*pixel_size*(xd+1),
-		   fontheight*pixel_size*(yd+1),
-		   x*FONT_WIDTH*pixel_size, y*fontheight*pixel_size);
-
-	 /* Super-PFUSCH !!   (for 2 bit DRC's):             */
-	 /* repaint transparent DCLUT colors with fullscr_bg */
-	 if(ch->bits==2) {
-	    for(i=0; i<4; i++)  if(dclut[i]==TRANSPARENT) colormask |= 1<<i;
-	    if(colormask) {
-	       make_stipple(ch->raw, tmpraw, colormask);
-	       rawfont2bitmap(tmpraw, tmpdata, pixel_size*(xd+1),
-			      pixel_size*(yd+1) );
-	       gcv.stipple =
-	          XCreateBitmapFromData(dpy, btxwin, tmpdata,
-					FONT_WIDTH*pixel_size*(xd+1),
-					FONT_HEIGHT*pixel_size*(yd+1));
-	    
-	       gcv.foreground = colormap[32+4+y].pixel;
-	       cur_fg = 32+4+y;
-	       gcv.ts_x_origin = x*FONT_WIDTH*pixel_size;
-	       gcv.ts_y_origin = y*fontheight*pixel_size;
-	       gcv.fill_style = FillStippled;
-	       XChangeGC(dpy, gc, GCForeground|GCStipple|GCTileStipXOrigin |
-			 GCTileStipYOrigin|GCFillStyle, &gcv);
-	       XFillRectangle(dpy, btxwin, gc, x*FONT_WIDTH*pixel_size,
-			      y*fontheight*pixel_size,
-			      FONT_WIDTH*pixel_size*(xd+1),
-			      fontheight*pixel_size*(yd+1) );
-	       XSetFillStyle(dpy, gc, FillSolid);
-	       XFreePixmap(dpy, gcv.stipple);
-	    } /* colormask */
-	 } /* bits==2 */
-      } /* TIA */
-   } /* memimage */
-#endif
 }
 
 
