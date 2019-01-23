@@ -50,7 +50,9 @@ typedef struct {
    int red;
    int green;
    int blue;
-} XColor;
+} color;
+
+unsigned char *memimage = NULL;
 
 extern int      scr, btxwidth;
 extern int pixel_size, have_color, visible, fontheight;
@@ -60,13 +62,11 @@ extern char raw_font[];
 static struct btxchar btx_font[6*96];
 static int fullrow_bg[24];        /* fullrow background color for eacch row */
 static int dclut[4];              /* map the 4-color DRC's */
-static XColor colormap[32+4+24];  /* store pixel value for each colorcell */
+static color colormap[32+4+24];   /* store pixel value for each colorcell */
 
 /* local functions */
 static void xdraw_normal_char(struct btxchar *ch, int x, int y, int xd, int yd, int ul, struct btxchar *dia, int fg, int bg);
 static void xdraw_multicolor_char(struct btxchar *ch, int x, int y, int xd, int yd);
-static void init_colormap(void);
-
 
 /*
  * initialize character sets. No Pixmaps are created.
@@ -149,33 +149,30 @@ static void xdraw_normal_char(ch, x, y, xd, yd, ul, dia, fg, bg)
 struct btxchar *ch, *dia;
 int x, y, xd, yd, ul, fg, bg;
 {
-   extern unsigned char *memimage;  /* draw to window or to memory ?? */
    int i, j, z, s, yy, yyy, xxx;
 
    if(fg==TRANSPARENT)  fg = 32+4+y;
    if(bg==TRANSPARENT)  bg = 32+4+y;
 
-   if(memimage) {
-      z=y*fontheight;
-      for(yy=0; yy<fontheight; yy++) {
-	 for(yyy=0; yyy<(yd+1); yyy++) {
-	    s=x*FONT_WIDTH;
-	    for(j=0; j<2; j++)
-	       for(i=5; i>=0; i--)
-		  for(xxx=0; xxx<(xd+1); xxx++, s++)
-	             set_mem(s, z, ( (ch->raw[yy*2+j]&(1<<i)) ||
-				     (dia && (dia->raw[yy*2+j]&(1<<i))) )
-			           ? fg : bg);
-	    z++;
-	 }
+   z=y*fontheight;
+   for(yy=0; yy<fontheight; yy++) {
+      for(yyy=0; yyy<(yd+1); yyy++) {
+         s=x*FONT_WIDTH;
+         for(j=0; j<2; j++)
+            for(i=5; i>=0; i--)
+               for(xxx=0; xxx<(xd+1); xxx++, s++)
+                  set_mem(s, z, ( (ch->raw[yy*2+j]&(1<<i)) ||
+                                  (dia && (dia->raw[yy*2+j]&(1<<i))) )
+                                ? fg : bg);
+         z++;
       }
-      
-      if(ul)
-         for(yyy=0; yyy<(yd+1); yyy++)
-	    for(xxx=0; xxx<FONT_WIDTH*(xd+1); xxx++)
-	       set_mem(x*FONT_WIDTH+xxx,
-		       y*fontheight+(fontheight-1)*(yd+1)+yyy, fg);
    }
+   
+   if(ul)
+      for(yyy=0; yyy<(yd+1); yyy++)
+         for(xxx=0; xxx<FONT_WIDTH*(xd+1); xxx++)
+            set_mem(x*FONT_WIDTH+xxx,
+                    y*fontheight+(fontheight-1)*(yd+1)+yyy, fg);
 }
 
 
@@ -183,71 +180,33 @@ static void xdraw_multicolor_char(ch, x, y, xd, yd)
 struct btxchar *ch;
 int x, y, xd, yd;
 {
-   extern unsigned char *memimage;  /* draw to window or to memory ?? */
    extern int tia;
    int c, i, j, z, s, p, yy, xxx, yyy;
 
-   if(memimage) {
-      z=y*fontheight;
-      for(yy=0; yy<fontheight; yy++) {
-	 for(yyy=0; yyy<(yd+1); yyy++) {
-	    s=x*FONT_WIDTH;
-	    for(j=0; j<2; j++)
-	       for(i=5; i>=0; i--) {
-		  for(p=0, c=0; p<ch->bits; p++)
-		     if(ch->raw[p*2*FONT_HEIGHT+yy*2+j]&(1<<i))  c |= 1<<p;
-		  if(ch->bits==2) {
-		     c = dclut[c];
-		     if(c==TRANSPARENT)  c = 32+4+y;
-		  }
-		  else c += 16;
-		  for(xxx=0; xxx<(xd+1); xxx++, s++)  set_mem(s, z, c);
-	       }
-	    z++;
-	 }
+   z=y*fontheight;
+   for(yy=0; yy<fontheight; yy++) {
+      for(yyy=0; yyy<(yd+1); yyy++) {
+         s=x*FONT_WIDTH;
+         for(j=0; j<2; j++)
+            for(i=5; i>=0; i--) {
+               for(p=0, c=0; p<ch->bits; p++)
+                  if(ch->raw[p*2*FONT_HEIGHT+yy*2+j]&(1<<i))  c |= 1<<p;
+               if(ch->bits==2) {
+                  c = dclut[c];
+                  if(c==TRANSPARENT)  c = 32+4+y;
+               }
+               else c += 16;
+               for(xxx=0; xxx<(xd+1); xxx++, s++)  set_mem(s, z, c);
+            }
+         z++;
       }
    }
-}
-
-
-void xscroll(int upper, int lower, int up)
-{
-#if 0
-   int col, y;
-   
-   if(visible) {
-      /* XSetGraphicsExposures(dpy, gc, True); */
-
-      if(upper<lower)
-         XCopyArea(dpy, btxwin, btxwin, gc, 0,
-		   (upper+up)*fontheight*pixel_size,
-		   btxwidth, (lower-upper)*fontheight*pixel_size,
-		   0, (upper+!up)*fontheight*pixel_size);
-
-      /* XSetGraphicsExposures(dpy, gc, False); */
-
-      /* clear the scrolled in row */
-      y = up ? lower : upper;
-      if(have_color) {
-	 col = 32+4+y;
-	 if(cur_fg!=col)
-	    { XSetForeground(dpy, gc, colormap[col].pixel); cur_fg=col;}
-      }
-      else XSetForeground(dpy, gc, WhitePixel(dpy, scr));
-      
-      XFillRectangle(dpy, btxwin, gc, 0, y*fontheight*pixel_size, btxwidth,
-		     fontheight*pixel_size);
-
-      if(!have_color) XSetForeground(dpy, gc, BlackPixel(dpy, scr));
-   }
-#endif
 }
 
 
 void xcursor(int x, int y)
 {
    /* this inverts the character at the given location */
-   extern unsigned char *memimage;
    for (int yy = y * fontheight; yy < y * fontheight + fontheight; yy++) {
       for (int xx = x * 12; xx < x * 12 + 12; xx++) {
          memimage[(yy)*480*3 + (xx)*3 + 0] ^= 0xFF;
@@ -302,18 +261,9 @@ void free_DRCS()
 
 
 /*
- * initialize colormap and STORE colors !
- */
-void default_colors()   /* page 153 */
-{
-   init_colormap();
-}
-
-
-/*
  * initialize colormap entries for clut 0-3, DCLUT + fullrow background
  */
-static void init_colormap()
+void default_colors()
 {
    int n;
 
@@ -394,4 +344,11 @@ int row, index;
    colormap[32+4+row].red   = colormap[index].red;
    colormap[32+4+row].green = colormap[index].green;
    colormap[32+4+row].blue  = colormap[index].blue;
+}
+
+void init_xfont()
+{
+   memimage = malloc(480*240*3);
+   init_fonts();
+   default_colors();
 }

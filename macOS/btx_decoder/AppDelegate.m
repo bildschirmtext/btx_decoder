@@ -15,7 +15,6 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
-#define MEMIMAGE_SIZE (480*240*3)
 FILE *textlog;
 int visible=1;
 
@@ -64,9 +63,7 @@ static CVReturn renderCallback(CVDisplayLinkRef displayLink,
 @implementation View
 
 - (CGImageRef)createGameBoyScreenCGImageRef {
-    uint8_t *pictureCopy = memimage;
-
-    CGDataProviderRef provider = CGDataProviderCreateWithData(NULL, pictureCopy, MEMIMAGE_SIZE, NULL);
+    CGDataProviderRef provider = CGDataProviderCreateWithData(NULL, memimage, 480*240*3, NULL);
     CGColorSpaceRef colorspace = CGColorSpaceCreateDeviceRGB();
 
     CGImageRef image = CGImageCreate(480, 240, 8, 24, 480*3, colorspace, kCGBitmapByteOrderDefault | kCGImageAlphaNone, provider, NULL, NO, kCGRenderingIntentDefault);
@@ -182,11 +179,9 @@ static CVReturn renderCallback(CVDisplayLinkRef displayLink,
     [self.window.contentView addSubview:view];
     [self.window makeFirstResponder:view];
 
-    memimage = malloc(MEMIMAGE_SIZE);
     textlog = stderr;
     
-    init_fonts();
-    default_colors();
+    init_xfont();
     init_layer6();
 
 

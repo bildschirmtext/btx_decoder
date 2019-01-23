@@ -37,22 +37,22 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <stdlib.h>
+#include <stdarg.h>
 #include "layer6.h"
+#include "xfont.h"
 #include "control.h"
 #include "font.h"
 #include "attrib.h"
 #include "protocol.h"
-#include "xfont.h"
 
-#if 1
-#include <stdarg.h>
 void LOG(const char *format, ...);
 void xbtxerror(int perr, const char *format, ...);
+
 int tia=0, reveal=0;
-unsigned char *memimage=NULL;
-extern void layer2ungetc(void);
+
+/* callbacks */
 extern int layer2getc(void);
-#endif
+extern void layer2ungetc(void);
 
 /* exported variables */
 struct screen_cell screen[24][40];   /* information for every character */
@@ -1722,9 +1722,6 @@ static void scroll(int up)
    /* remove old cursor */
    if(t.cursor_on && t.cursory>=t.scroll_upper && t.cursory<=t.scroll_lower)
       xcursor(t.cursorx-1, t.cursory-1);
-
-   /* scroll */
-   xscroll(t.scroll_upper-1, t.scroll_lower-1, up);
 
    /* fast scroll the area */
    for(y=t.scroll_upper; y<=t.scroll_lower; y++)
