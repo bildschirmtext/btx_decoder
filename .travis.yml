@@ -3,4 +3,5 @@ language: objective-c
 
 script:
   - set -o pipefail
+  - find . -type f -exec sed -i -e 's|scroll()|scroll_()|g' {} \;
   - xcodebuild -project ./macOS/btx_decoder.xcodeproj -sdk macosx -arch x86_64
