@@ -6,6 +6,7 @@
 #import "AppDelegate.h"
 #import <QuartzCore/QuartzCore.h>
 #import "xfont.h"
+#import "layer6.h"
 
 #include <errno.h>
 #include <string.h>
@@ -15,9 +16,6 @@
 #include <netinet/in.h>
 
 #define MEMIMAGE_SIZE (480*240*3)
-extern unsigned char *memimage;
-extern void init_layer6(void);
-extern int process_BTX_data(void);
 FILE *textlog;
 int visible=1;
 

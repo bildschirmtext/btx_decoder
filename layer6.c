@@ -37,6 +37,7 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <stdlib.h>
+#include "layer6.h"
 #include "control.h"
 #include "font.h"
 #include "attrib.h"
@@ -664,6 +665,7 @@ static void do_ESC()
 	       for(y=0; y<24; y++)
 	          define_fullrow_bg(y, c4==0x5e ?
 				    TRANSPARENT : t.clut*8+c4-0x50);
+               redraw_screen_rect(0, 0, 39, rows-1);
                break;
             case 0x21:
                LOG("       full row\n");
@@ -1677,10 +1679,9 @@ static void clearscreen()
 	 screen[y][x].mark = 0;
 	 screen[y][x].fg = WHITE;
 	 screen[y][x].bg = TRANSPARENT;
-     redrawc(x+1, y+1);
       }
 
-//   xclearscreen();
+   redraw_screen_rect(0, 0, 39, rows-1);
    if(t.cursor_on) xcursor(0, 0);
 }
 
