@@ -46,14 +46,11 @@
 #include "font.h"
 #include "attrib.h"
 
+/* exported variables */
 // TODO: hook 
 int tia = 0;    /* 1: white-on-black mode, no attributes */
 int reveal = 0; /* 1: show hidden content */
-
-/* exported variables */
-struct screen_cell screen[24][40];   /* information for every character */
-int rows, fontheight;                /* 20 rows(12 high) or 24 rows(10 high) */
-int dirty;                           /* screen change that requires a redraw */
+int dirty;      /* screen change that requires a redraw */
 
 /* local terminal status */
 static struct {
@@ -78,6 +75,8 @@ static struct {
    int scroll_impl, scroll_area;
    int hold_mosaic;
 } t, backup;
+struct screen_cell screen[24][40];   /* information for every character */
+int rows, fontheight;                /* 20 rows(12 high) or 24 rows(10 high) */
 
 /* local functions */
 void LOG(const char *format, ...);
@@ -184,7 +183,7 @@ static void default_sets()
  */
 static void invert_cursor(x, y)
 {
-   xcursor(x, y);
+   xcursor(x, y, fontheight);
    dirty = 1;
 }
 
@@ -1542,7 +1541,7 @@ static void redrawc(int x, int y)
    
    if(tia) {
       xputc(screen[y-1][x-1].chr&0x7f, screen[y-1][x-1].set, x-1, y-1,
-	    0, 0, 0, (screen[y-1][x-1].chr>>8) & 0x7f, WHITE, BLACK);
+	    0, 0, 0, (screen[y-1][x-1].chr>>8) & 0x7f, WHITE, BLACK, fontheight, rows);
       if(t.cursor_on && x==t.cursorx && y==t.cursory)  invert_cursor(x-1, y-1);
    }
    else {
@@ -1586,7 +1585,8 @@ static void redrawc(int x, int y)
 	       attrib(y, x, ATTR_UNDERLINE),
 	       (screen[y-1][x-1].chr>>8) & 0x7f,
 	       attrib(y, x, ATTR_INVERTED) ? attr_bg(y, x) : attr_fg(y, x),
-	       attrib(y, x, ATTR_INVERTED) ? attr_fg(y, x) : attr_bg(y, x) );
+	       attrib(y, x, ATTR_INVERTED) ? attr_fg(y, x) : attr_bg(y, x),
+               fontheight, rows);
 	 if(t.cursor_on && x==t.cursorx && y==t.cursory)  invert_cursor(x-1, y-1);
 
 	 /* update 'real' attributes */

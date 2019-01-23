@@ -34,7 +34,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "font.h"
-#include "layer6.h"
+//#include "layer6.h"
 #include "attrib.h"
 #include "xfont.h"
 #include "rawfont.h"
@@ -63,8 +63,8 @@ static int dclut[4];              /* map the 4-color DRC's */
 static color colormap[32+4+24];   /* store pixel value for each colorcell */
 
 /* local functions */
-static void xdraw_normal_char(struct btxchar *ch, int x, int y, int xd, int yd, int ul, struct btxchar *dia, int fg, int bg);
-static void xdraw_multicolor_char(struct btxchar *ch, int x, int y, int xd, int yd);
+static void xdraw_normal_char(struct btxchar *ch, int x, int y, int xd, int yd, int ul, struct btxchar *dia, int fg, int bg, int fontheight);
+static void xdraw_multicolor_char(struct btxchar *ch, int x, int y, int xd, int yd, int fontheight);
 
 /*
  * initialize character sets.
@@ -112,7 +112,7 @@ void init_fonts()
  * 0=don't).
  */
 
-void xputc(int c, int set, int x, int y, int xdouble, int ydouble, int underline, int diacrit, int fg, int bg)
+void xputc(int c, int set, int x, int y, int xdouble, int ydouble, int underline, int diacrit, int fg, int bg, int fontheight, int rows)
 {
    struct btxchar *ch, *dia;
    
@@ -128,10 +128,10 @@ void xputc(int c, int set, int x, int y, int xdouble, int ydouble, int underline
 
    if(ch->bits==1) {
       dia = diacrit ? btx_font + SUPP*96 + diacrit - 0x20 : NULL;
-      xdraw_normal_char(ch, x, y, xdouble, ydouble, underline, dia, fg, bg);
+      xdraw_normal_char(ch, x, y, xdouble, ydouble, underline, dia, fg, bg, fontheight);
    }
    else {  /* 2/4 bits */
-      xdraw_multicolor_char(ch, x, y, xdouble, ydouble);
+      xdraw_multicolor_char(ch, x, y, xdouble, ydouble, fontheight);
    }
 }
 
@@ -141,9 +141,7 @@ void xputc(int c, int set, int x, int y, int xdouble, int ydouble, int underline
    memimage[(y)*480*3 + (x)*3 + 1] = colormap[col].green; \
    memimage[(y)*480*3 + (x)*3 + 2] = colormap[col].blue; }
 
-static void xdraw_normal_char(ch, x, y, xd, yd, ul, dia, fg, bg)
-struct btxchar *ch, *dia;
-int x, y, xd, yd, ul, fg, bg;
+static void xdraw_normal_char(struct btxchar *ch, int x, int y, int xd, int yd, int ul, struct btxchar *dia, int fg, int bg, int fontheight)
 {
    int i, j, z, s, yy, yyy, xxx;
 
@@ -172,9 +170,7 @@ int x, y, xd, yd, ul, fg, bg;
 }
 
 
-static void xdraw_multicolor_char(ch, x, y, xd, yd)
-struct btxchar *ch;
-int x, y, xd, yd;
+static void xdraw_multicolor_char(struct btxchar *ch, int x, int y, int xd, int yd, int fontheight)
 {
    int c, i, j, z, s, p, yy, xxx, yyy;
 
@@ -199,7 +195,7 @@ int x, y, xd, yd;
 }
 
 
-void xcursor(int x, int y)
+void xcursor(int x, int y, int fontheight)
 {
    /* this inverts the character at the given location */
    for (int yy = y * fontheight; yy < y * fontheight + fontheight; yy++) {
@@ -318,8 +314,7 @@ void define_color(unsigned int index, unsigned int r, unsigned int g, unsigned i
 /*
  * set RGB values for DCLUT color 'entry' to those of color 'index'.
  */
-void define_DCLUT(entry, index)
-int entry, index;
+void define_DCLUT(int entry, int index)
 {
    dclut[entry] = index;
    colormap[32+entry].red   = colormap[index].red;
@@ -331,8 +326,7 @@ int entry, index;
 /*
  * set RGB values for fullrow_bg of 'row' to those of color 'index'.
  */
-void define_fullrow_bg(row, index)
-int row, index;
+void define_fullrow_bg(int row, int index)
 {
    fullrow_bg[row] = index;
    colormap[32+4+row].red   = colormap[index].red;
