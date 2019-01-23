@@ -63,7 +63,7 @@ void layer2ungetc()
     is_last_char_buffered = 1;
 }
 
-void layer2write(unsigned char *s, int len)
+void layer2write(unsigned char *s, unsigned int len)
 {
     if (send(sockfd, s, len, 0) == -1){
         perror("send");

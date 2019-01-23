@@ -33,7 +33,6 @@
 
 #define FONT_WIDTH  12
 #define FONT_HEIGHT 12
-#define MAXSTRETCH   8    /* maximaler Streckungsfaktor fuer Original Font */
 
 #define PRIM 0
 #define SUP2 1

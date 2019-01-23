@@ -181,7 +181,7 @@ static void default_sets()
  * invert the character at the given location
  * in order to show/hide the cursor
  */
-static void invert_cursor(x, y)
+static void invert_cursor(int x, int y)
 {
    xcursor(x, y, fontheight);
    dirty = 1;

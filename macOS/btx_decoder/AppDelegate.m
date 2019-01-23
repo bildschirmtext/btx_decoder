@@ -16,12 +16,12 @@
 - (void)swapToNextFrame;
 @end
 
-static CVReturn renderCallback(CVDisplayLinkRef displayLink,
-                               const CVTimeStamp *inNow,
-                               const CVTimeStamp *inOutputTime,
-                               CVOptionFlags flagsIn,
-                               CVOptionFlags *flagsOut,
-                               void *displayLinkContext) {
+static CVReturn renderCallback(__unused CVDisplayLinkRef displayLink,
+                               __unused const CVTimeStamp *inNow,
+                               __unused const CVTimeStamp *inOutputTime,
+                               __unused CVOptionFlags flagsIn,
+                               __unused CVOptionFlags *flagsOut,
+                               __unused void *displayLinkContext) {
     [(__bridge View *)displayLinkContext swapToNextFrame];
     return kCVReturnSuccess;
 }
@@ -40,7 +40,7 @@ static CVReturn renderCallback(CVDisplayLinkRef displayLink,
     return self;
 }
 
-- (void)drawRect:(NSRect)dirtyRect {
+- (void)drawRect:(__unused NSRect)dirtyRect {
     // intentionally nothing
 }
 
