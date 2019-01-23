@@ -63,7 +63,7 @@ static CVReturn renderCallback(CVDisplayLinkRef displayLink,
 
 @implementation View
 
-- (CGImageRef)createGameBoyScreenCGImageRef {
+- (CGImageRef)createCGImageRef {
     CGDataProviderRef provider = CGDataProviderCreateWithData(NULL, memimage, 480*240*3, NULL);
     CGColorSpaceRef colorspace = CGColorSpaceCreateDeviceRGB();
 
@@ -103,7 +103,7 @@ static CVReturn renderCallback(CVDisplayLinkRef displayLink,
 }
 
 - (void)updateLayerContents {
-    CGImageRef fullScreenImage = [self createGameBoyScreenCGImageRef];
+    CGImageRef fullScreenImage = [self createCGImageRef];
     self.nextLayerContents = CFBridgingRelease(fullScreenImage);
 }
 

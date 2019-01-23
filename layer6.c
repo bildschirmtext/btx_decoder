@@ -55,8 +55,8 @@ extern void layer2ungetc(void);
 
 /* exported variables */
 struct screen_cell screen[24][40];   /* information for every character */
-int rows, fontheight, reachedEOF;    /* 20 rows(12 high) or 24 rows(10 high) */
-int dirty;
+int rows, fontheight;                /* 20 rows(12 high) or 24 rows(10 high) */
+int dirty;                           /* screen change that requires a redraw */
 
 /* local terminal status */
 static struct {
@@ -179,6 +179,15 @@ static void default_sets()
    t.supp = G2;
 }
 
+/*
+ * invert the character at the given location
+ * in order to show/hide the cursor
+ */
+static void invert_cursor(x, y)
+{
+   xcursor(x, y);
+   dirty = 1;
+}
 
 /*
  * move the cursor, perform automatic wraparound (page 97)
@@ -189,7 +198,7 @@ static void move_cursor(int cmd, int y, int x)
    int up=0, down=0;
 
    /* erase old cursor */
-   if(t.cursor_on) xcursor(t.cursorx-1, t.cursory-1);
+   if(t.cursor_on) invert_cursor(t.cursorx-1, t.cursory-1);
 
    /* move & wrap */
    switch(cmd) {
@@ -254,7 +263,7 @@ static void move_cursor(int cmd, int y, int x)
    }
 
    /* draw new cursor */
-   if(t.cursor_on) xcursor(t.cursorx-1, t.cursory-1);
+   if(t.cursor_on) invert_cursor(t.cursorx-1, t.cursory-1);
 }
 
       
@@ -312,7 +321,7 @@ static int primary_control_C0(int c1)  /* page 118, annex 6 */
          LOG("CON cursor on\n");
 	 if(!t.cursor_on) {
 	    t.cursor_on = 1;
-	    xcursor(t.cursorx-1, t.cursory-1);
+	    invert_cursor(t.cursorx-1, t.cursory-1);
 	 }
          break;
 
@@ -327,7 +336,7 @@ static int primary_control_C0(int c1)  /* page 118, annex 6 */
          LOG("COF cursor off\n");
 	 if(t.cursor_on) {
 	    t.cursor_on = 0;
-	    xcursor(t.cursorx-1, t.cursory-1);
+	    invert_cursor(t.cursorx-1, t.cursory-1);
 	 }
          break;
 
@@ -601,7 +610,7 @@ static void do_US()  /* page 85/86 */
 
       case 0x3e:  /* annex 7.4 */
 	 LOG("    Telesoftware\n");
-#if 0
+#if 0 // TODO: add this
 	 do_TSW();
 #endif
 	 break;
@@ -1539,7 +1548,7 @@ static void redrawc(int x, int y)
    if(tia) {
       xputc(screen[y-1][x-1].chr&0x7f, screen[y-1][x-1].set, x-1, y-1,
 	    0, 0, 0, (screen[y-1][x-1].chr>>8) & 0x7f, WHITE, BLACK);
-      if(t.cursor_on && x==t.cursorx && y==t.cursory)  xcursor(x-1, y-1);
+      if(t.cursor_on && x==t.cursorx && y==t.cursory)  invert_cursor(x-1, y-1);
    }
    else {
       /* check whether attributes are valid */
@@ -1583,7 +1592,7 @@ static void redrawc(int x, int y)
 	       (screen[y-1][x-1].chr>>8) & 0x7f,
 	       attrib(y, x, ATTR_INVERTED) ? attr_bg(y, x) : attr_fg(y, x),
 	       attrib(y, x, ATTR_INVERTED) ? attr_fg(y, x) : attr_bg(y, x) );
-	 if(t.cursor_on && x==t.cursorx && y==t.cursory)  xcursor(x-1, y-1);
+	 if(t.cursor_on && x==t.cursorx && y==t.cursory)  invert_cursor(x-1, y-1);
 
 	 /* update 'real' attributes */
 	 real = screen[y-1][x-1].real;
@@ -1686,7 +1695,7 @@ static void clearscreen()
       }
 
    redraw_screen_rect(0, 0, 39, rows-1);
-   if(t.cursor_on) xcursor(0, 0);
+   if(t.cursor_on) invert_cursor(0, 0);
 }
 
 
@@ -1723,7 +1732,7 @@ static void scroll(int up)
 
    /* remove old cursor */
    if(t.cursor_on && t.cursory>=t.scroll_upper && t.cursory<=t.scroll_lower)
-      xcursor(t.cursorx-1, t.cursory-1);
+      invert_cursor(t.cursorx-1, t.cursory-1);
 
    /* fast scroll the area */
    for(y=t.scroll_upper; y<=t.scroll_lower; y++)
@@ -1731,7 +1740,7 @@ static void scroll(int up)
 
    /* redraw cursor */
    if(t.cursor_on && t.cursory>=t.scroll_upper && t.cursory<=t.scroll_lower)
-      xcursor(t.cursorx-1, t.cursory-1);
+      invert_cursor(t.cursorx-1, t.cursory-1);
 }
 
 
