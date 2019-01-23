@@ -1319,6 +1319,7 @@ static void set_attr(int a, int set, int col, int mode)
    /* set fullrow background */
    if(mode==2 && a==ATTR_BACKGROUND) {
       define_fullrow_bg(y, col);
+      redraw_screen_rect(0, y, 39, y);
       return;
    }
 
@@ -1400,6 +1401,7 @@ static void set_attr(int a, int set, int col, int mode)
 	 x++;
       }         /* while x<40 && (serialmode --> no marker set) */
       while(x<40  && (mode!=1 || !(screen[y][x].mark & mattr)) );
+
    }
    else {  /* parallel */
       switch(a) {
