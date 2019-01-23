@@ -15,7 +15,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
-FILE *textlog;
+FILE *textlog = NULL;
 int visible=1;
 
 FILE *f;
@@ -179,11 +179,10 @@ static CVReturn renderCallback(CVDisplayLinkRef displayLink,
     [self.window.contentView addSubview:view];
     [self.window makeFirstResponder:view];
 
-    textlog = stderr;
+//    textlog = stderr;
     
     init_xfont();
     init_layer6();
-
 
     struct hostent *he;
     struct sockaddr_in their_addr;
@@ -209,27 +208,33 @@ static CVReturn renderCallback(CVDisplayLinkRef displayLink,
         exit(1);
     }
 
+    // Thread 1: Decoder    
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        NSTimeInterval timePerFrame = 1.0 / (1024.0 * 1024.0 / 114.0 / 154.0);
+        for (;;) {
+            process_BTX_data();
+        }
+    });
 
-        self.nextFrameTime = [NSDate timeIntervalSinceReferenceDate] + timePerFrame;
+    // Thread 2: Display
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        NSTimeInterval TIME_PER_FRAME = 1.0 / 60;
+
+        self.nextFrameTime = [NSDate timeIntervalSinceReferenceDate] + TIME_PER_FRAME;
 
         for (;;) {
-            if (process_BTX_data()) {
-//                break;
-            }
-            if (true /*gb->is_ppu_dirty()*/) {
-                //gb->clear_ppu_dirty();
-                [view updateLayerContents];
-
-                // wait until the next 60 hz tick
-                NSTimeInterval interval = [NSDate timeIntervalSinceReferenceDate];
-                if (interval < self.nextFrameTime) {
-//                     [NSThread sleepForTimeInterval:self.nextFrameTime - interval];
-                } else if (interval - 20 * timePerFrame > self.nextFrameTime) {
-                    self.nextFrameTime = interval;
+            NSTimeInterval now = [NSDate timeIntervalSinceReferenceDate];
+            if (now < self.nextFrameTime) {
+                [NSThread sleepForTimeInterval:self.nextFrameTime - now];
+            } else {
+                if (dirty) {
+                    dirty = 0;
+                    [view updateLayerContents];
                 }
-                self.nextFrameTime += timePerFrame;
+                if (now - 2 * TIME_PER_FRAME > self.nextFrameTime) {
+                    self.nextFrameTime = now;
+                } else {
+                    self.nextFrameTime += TIME_PER_FRAME;
+                }
             }
         }
     });

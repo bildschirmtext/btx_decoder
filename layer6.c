@@ -57,6 +57,7 @@ extern void layer2ungetc(void);
 /* exported variables */
 struct screen_cell screen[24][40];   /* information for every character */
 int rows, fontheight, reachedEOF;    /* 20 rows(12 high) or 24 rows(10 high) */
+int dirty;
 
 /* local terminal status */
 static struct {
@@ -136,7 +137,7 @@ void init_layer6()
 int process_BTX_data()
 {
    int set, c1, c2, dct=0;
-
+   
    c1 = layer2getc();
 
    if(     c1>=0x00 && c1<=0x1f)  dct = primary_control_C0(c1);
@@ -1534,6 +1535,8 @@ static void redrawc(int x, int y)
    int c, set, xd, yd, up_in=0, dn_in=0;
    unsigned int real, xreal=0, yreal=0, xyreal=0;
 
+   dirty = 1;
+   
    if(tia) {
       xputc(screen[y-1][x-1].chr&0x7f, screen[y-1][x-1].set, x-1, y-1,
 	    0, 0, 0, (screen[y-1][x-1].chr>>8) & 0x7f, WHITE, BLACK);

@@ -47,14 +47,14 @@ struct btxchar {
                             /* 3: xydouble */
 
 typedef struct {
-   int red;
-   int green;
-   int blue;
+   unsigned char red;
+   unsigned char green;
+   unsigned char blue;
 } color;
 
 unsigned char *memimage = NULL;
 
-extern int      scr, btxwidth;
+extern int scr, btxwidth;
 extern int pixel_size, have_color, visible, fontheight;
 extern char raw_font[];
 
@@ -69,7 +69,7 @@ static void xdraw_normal_char(struct btxchar *ch, int x, int y, int xd, int yd, 
 static void xdraw_multicolor_char(struct btxchar *ch, int x, int y, int xd, int yd);
 
 /*
- * initialize character sets. No Pixmaps are created.
+ * initialize character sets.
  */
 
 void init_fonts()
@@ -111,8 +111,7 @@ void init_fonts()
 /*
  * draw the specified character at cursor position x, y (zero based).
  * The character is stretched according to xdouble, ydouble (1=stretch,
- * 0=don't). If the Pixmap for this state doesn't exist, it will be
- * created and cached.
+ * 0=don't).
  */
 
 void xputc(int c, int set, int x, int y, int xdouble, int ydouble, int underline, int diacrit, int fg, int bg)
@@ -141,9 +140,9 @@ void xputc(int c, int set, int x, int y, int xdouble, int ydouble, int underline
 
 
 #define set_mem(x, y, col) { \
-   memimage[(y)*480*3 + (x)*3 + 0] = colormap[col].red>>8;   \
-   memimage[(y)*480*3 + (x)*3 + 1] = colormap[col].green>>8; \
-   memimage[(y)*480*3 + (x)*3 + 2] = colormap[col].blue>>8; }
+   memimage[(y)*480*3 + (x)*3 + 0] = colormap[col].red;   \
+   memimage[(y)*480*3 + (x)*3 + 1] = colormap[col].green; \
+   memimage[(y)*480*3 + (x)*3 + 2] = colormap[col].blue; }
 
 static void xdraw_normal_char(ch, x, y, xd, yd, ul, dia, fg, bg)
 struct btxchar *ch, *dia;
@@ -218,8 +217,7 @@ void xcursor(int x, int y)
 
 /*
  * defines the raw bitmap data for a DRC 'c'. If 'c' was in use before,
- * its old raw data and Pixmaps are freed. No Pixmap for any state is
- * initialized, since xputc() does this on demand.
+ * its old raw data is freed.
  */
 
 void define_raw_DRC(int c, char *data, int bits)
@@ -270,16 +268,16 @@ void default_colors()
    /* clut 0 + clut 1 */
    for(n=0; n<16; n++) {  /* page 112) */
       if(n==8)  { colormap[n] = colormap[0]; continue; }
-      colormap[n].red   = ((n&1)>0) ? ( ((n&8)==0) ? 0xffff : 0x7fff ) : 0;
-      colormap[n].green = ((n&2)>0) ? ( ((n&8)==0) ? 0xffff : 0x7fff ) : 0;
-      colormap[n].blue  = ((n&4)>0) ? ( ((n&8)==0) ? 0xffff : 0x7fff ) : 0;
+      colormap[n].red   = ((n&1)>0) ? ( ((n&8)==0) ? 0xff : 0x7f ) : 0;
+      colormap[n].green = ((n&2)>0) ? ( ((n&8)==0) ? 0xff : 0x7f ) : 0;
+      colormap[n].blue  = ((n&4)>0) ? ( ((n&8)==0) ? 0xff : 0x7f ) : 0;
    }
 
    /* clut 2 + clut 3 */
    for(n=0; n<8; n++) {
-      colormap[n+16].red   = colormap[n+24].red   = n&1 ? 0xffff : 0;
-      colormap[n+16].green = colormap[n+24].green = n&2 ? 0xffff : 0;
-      colormap[n+16].blue  = colormap[n+24].blue  = n&4 ? 0xffff : 0;
+      colormap[n+16].red   = colormap[n+24].red   = n&1 ? 0xff : 0;
+      colormap[n+16].green = colormap[n+24].green = n&2 ? 0xff : 0;
+      colormap[n+16].blue  = colormap[n+24].blue  = n&4 ? 0xff : 0;
    }
 
    /* DCLUT */
@@ -307,9 +305,9 @@ void define_color(unsigned int index, unsigned int r, unsigned int g, unsigned i
 {
    int i;
    
-   colormap[index].red   = r << 12;
-   colormap[index].green = g << 12;
-   colormap[index].blue  = b << 12;
+   colormap[index].red   = r << 4;
+   colormap[index].green = g << 4;
+   colormap[index].blue  = b << 4;
 
    /* if DCLUT contains this color, change DCLUT color too */
    for(i=0; i<4; i++)
