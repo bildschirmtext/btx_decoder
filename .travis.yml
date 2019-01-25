@@ -18,7 +18,7 @@ script:
 script:
   - set -o pipefail
   - xcodebuild -project ./macOS/btx_decoder.xcodeproj -sdk macosx -arch x86_64
-  - hdiutil create dist/btx_decoder.dmg -srcfolder macOS/build/Release/ -ov
+  - hdiutil create -format UDZO -srcfolder macOS/build/Release/ btx_decoder-$TRAVIS_BRANCH.dmg
 
 after_success:
   - wget -c https://github.com/probonopd/uploadtool/raw/master/upload.sh
