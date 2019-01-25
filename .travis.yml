@@ -5,7 +5,7 @@ matrix:
   include:
     - osx_image: xcode10.1
       env: 
-        - SDK_VERSION=10.7 MACOSX_DEPLOYMENT_TARGET=10.7
+        - SDK_VERSION=10.7 MACOSX_DEPLOYMENT_TARGET=10.7 SDKROOT=macosx10.7
 
 script:
   - |
