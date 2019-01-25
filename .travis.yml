@@ -10,3 +10,14 @@ matrix:
 script:
   - set -o pipefail
   - xcodebuild -project ./macOS/btx_decoder.xcodeproj -sdk macosx -arch x86_64
+  - macOS/build/Release/btx_decoder.app
+  - hdiutil create dist/btx_decoder.dmg -srcfolder macOS/build/Release/ -ov
+
+after_success:
+  - wget -c https://github.com/probonopd/uploadtool/raw/master/upload.sh
+  - bash upload.sh dist/*
+  
+branches:
+  except:
+    - # Do not build tags that we create when we upload to GitHub Releases
+    - /^(?i:continuous)/
