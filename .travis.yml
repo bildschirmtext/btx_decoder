@@ -12,11 +12,12 @@ script:
     if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
       echo "Downloading ${MACOSX_DEPLOYMENT_TARGET} sdk"
       curl -L -O https://github.com/phracker/MacOSX-SDKs/releases/download/MacOSX10.11.sdk/MacOSX${MACOSX_DEPLOYMENT_TARGET}.sdk.tar.xz
-      sudo tar xf MacOSX${MACOSX_DEPLOYMENT_TARGET}.sdk.tar.xz -C /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/
+      sudo tar xf MacOSX*.sdk.tar.xz -C /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/
       ls -lh /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/
       plutil -replace MinimumSDKVersion -string ${MACOSX_DEPLOYMENT_TARGET} $(xcode-select -p)/Platforms/MacOSX.platform/Info.plist
       plutil -replace DTSDKName -string macosx${MACOSX_DEPLOYMENT_TARGET}internal $(xcode-select -p)/Platforms/MacOSX.platform/Info.plist
       sed -i -e 's|MACOSX_DEPLOYMENT_TARGET = 10.13|MACOSX_DEPLOYMENT_TARGET = 10.7|g' ./macOS/btx_decoder.xcodeproj/project.pbxproj
+      xcodebuild -version -sdk
       set -o pipefail
       xcodebuild -project ./macOS/btx_decoder.xcodeproj -sdk macosx -arch x86_64
       mkdir -p out ; hdiutil create -format UDZO -srcfolder macOS/build/Release/ out/btx_decoder-$(git rev-parse --short HEAD).dmg
