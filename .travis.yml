@@ -5,10 +5,9 @@ matrix:
   include:
     - osx_image: xcode10.1
       env: 
-        - SDK_VERSION=10.9
+        - SDK_VERSION=10.7 MACOSX_DEPLOYMENT_TARGET=10.7
 
 script:
-  - export MACOSX_DEPLOYMENT_TARGET=${MACOSX_DEPLOYMENT_TARGET:-10.7}
   - echo "Downloading ${MACOSX_DEPLOYMENT_TARGET} sdk"
   - curl -L -O https://github.com/phracker/MacOSX-SDKs/releases/download/MacOSX10.11.sdk/MacOSX${MACOSX_DEPLOYMENT_TARGET}.sdk.tar.xz
   - tar -xf MacOSX${MACOSX_DEPLOYMENT_TARGET}.sdk.tar.xz -C "$(dirname "$CONDA_BUILD_SYSROOT")"  
