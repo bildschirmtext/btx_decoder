@@ -16,10 +16,11 @@ int sockfd;
 unsigned char last_char;
 int is_last_char_buffered = 0;
 
+//#define HOST "localhost"
 #define HOST "belgradstr.dyndns.org"
 #define PORT 20000 /* XXX the original port for CEPT is 20005 */
 
-void connect_to_service() {
+void layer2_connect() {
     struct hostent *he;
     struct sockaddr_in their_addr;
     
@@ -44,7 +45,7 @@ void connect_to_service() {
     }
 }
 
-int layer2getc()
+int layer2_getc()
 {
     if (is_last_char_buffered) {
         is_last_char_buffered = 0;
@@ -58,12 +59,12 @@ int layer2getc()
     return last_char;
 }
 
-void layer2ungetc()
+void layer2_ungetc()
 {
     is_last_char_buffered = 1;
 }
 
-void layer2write(unsigned char *s, unsigned int len)
+void layer2_write(unsigned char *s, unsigned int len)
 {
     if (send(sockfd, s, len, 0) == -1){
         perror("send");

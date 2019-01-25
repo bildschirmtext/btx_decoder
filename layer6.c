@@ -135,7 +135,7 @@ int process_BTX_data()
 {
    int set, c1, c2, dct=0;
    
-   c1 = layer2getc();
+   c1 = layer2_getc();
 
    if(     c1>=0x00 && c1<=0x1f)  dct = primary_control_C0(c1);
    else if(c1>=0x80 && c1<=0x9f)  supplementary_control_C1(c1, 0);
@@ -145,7 +145,7 @@ int process_BTX_data()
 
       if( set == SUPP  &&  (c1 & 0x70) == 0x40 ) {   /* diacritical ??? */
 	 LOG("diacritical mark %d\n", c1 & 0x0f);
-	 c2 = layer2getc();
+	 c2 = layer2_getc();
 	 if(c2&0x60) c1 = (c1<<8) | c2;
 	 t.sshift = 0;
       }
@@ -325,7 +325,7 @@ static int primary_control_C0(int c1)  /* page 118, annex 6 */
 
       case RPT:
          LOG("RPT repeat last char\n");
-         c2 = layer2getc() & 0x3f;
+         c2 = layer2_getc() & 0x3f;
          LOG("    %d times\n", c2);
          while(c2--)  output(t.lastchar);
          break;
@@ -561,21 +561,21 @@ static void do_US()  /* page 85/86 */
       move_cursor(APA, t.cursory, t.cursorx);
    }
    
-   c2 = layer2getc();
+   c2 = layer2_getc();
 
    switch(c2) {
 
       case 0x20:  /* annex 7.3 */
 	 LOG("    TFI Terminal Facility Identifier\n");
-	 c3 = layer2getc();
+	 c3 = layer2_getc();
 	 if(c3==0x40) {
 	    LOG("       TFI request\n");
-	    layer2write(TFI_string, 6);
+	    layer2_write(TFI_string, 6);
 	 }
 	 else {
 	    LOG("       TFI echo 0x%02x\n", c3);
 	    do {
-	       c3 = layer2getc();
+	       c3 = layer2_getc();
 	       LOG("       TFI echo 0x%02x\n", c3);
 	    }
 	    while(c3 & 0x20);  /* extension bit */
@@ -615,7 +615,7 @@ static void do_US()  /* page 85/86 */
 	 else {
 	    alphamosaic = 1;
 	    LOG("    new row    %2d\n", c2 & 0x3f);
-	    c3 = layer2getc();
+	    c3 = layer2_getc();
 	    LOG("    new column %2d\n", c3 & 0x3f);
 	    move_cursor(APA, c2 & 0x3f, c3 & 0x3f);
 	    t.par_attr = 0;
@@ -631,9 +631,9 @@ static void do_US()  /* page 85/86 */
     * other VPDE's has to be skipped (*17420101711a#).
     */
    if(!alphamosaic) {
-      while( (c2 = layer2getc()) != US )  LOG("skipping to next US\n");
+      while( (c2 = layer2_getc()) != US )  LOG("skipping to next US\n");
       LOG("\n");
-      layer2ungetc();
+      layer2_ungetc();
    }
 }
          
@@ -642,13 +642,13 @@ static void do_ESC()
 {
    int y, c2, c3, c4;
    
-   c2 = layer2getc();
+   c2 = layer2_getc();
 
    switch(c2) {
 
       case 0x22:
          LOG("    invoke C1\n");
-         c3 = layer2getc();
+         c3 = layer2_getc();
          LOG("       (%s)\n", c3==0x40 ? "serial" : "parallel");
 	 if(c3==0x40)  t.serialmode = 1;
 	 else {
@@ -659,11 +659,11 @@ static void do_ESC()
 
       case 0x23:
          LOG("    set attributes\n");
-         c3 = layer2getc();
+         c3 = layer2_getc();
          switch(c3) {
             case 0x20:
                LOG("       full screen background\n");
-               c4 = layer2getc();
+               c4 = layer2_getc();
                LOG("          color = %d\n",
 		   c4==0x5e ? TRANSPARENT : t.clut*8+c4-0x50);
 	       for(y=0; y<24; y++)
@@ -673,7 +673,7 @@ static void do_ESC()
                break;
             case 0x21:
                LOG("       full row\n");
-               c4 = layer2getc();
+               c4 = layer2_getc();
 	       LOG("          ");
 	       supplementary_control_C1(c4+0x40, 1);
                break;
@@ -685,7 +685,7 @@ static void do_ESC()
       case 0x2a:
       case 0x2b:
          LOG("    load G%d with\n", c2 - 0x28);
-         c3 = layer2getc();
+         c3 = layer2_getc();
          switch(c3) {
             case 0x40:
                LOG("       'primary graphic'\n");
@@ -707,7 +707,7 @@ static void do_ESC()
                break;
             case 0x20:
 	       LOG("       DRCS\n");
-               c4 = layer2getc();
+               c4 = layer2_getc();
                if(c4 != 0x40)  LOG("HAEH  (ESC 0x%02x 0x20 0x%02x)\n", c2, c4);
 	       else            LOG("\n");
                t.G0123L[c2 - 0x28] = DRCS;
@@ -757,7 +757,7 @@ static int do_CSI()
 {
    int c2, c3, upper, lower;
    
-   c2 = layer2getc();
+   c2 = layer2_getc();
    if(c2 == 0x42) {
       LOG("    STC stop conceal\n");
       set_attr(ATTR_CONCEALED, 0, 0, t.serialmode);
@@ -765,7 +765,7 @@ static int do_CSI()
    }
    
    LOG("\n");
-   c3 = layer2getc();
+   c3 = layer2_getc();
 
    /* protection only available as fullrow controls ?? (page 135) */
    if(c2 == 0x31 && c3 == 0x50) {
@@ -843,16 +843,16 @@ static int do_CSI()
 	 upper = c2 & 0x0f;
 	 if(c3>=0x30 && c3<=0x39)  upper = upper*10 + (c3&0x0f);
 	 LOG("       upper row: %2d\n", upper);
-	 if(c3>=0x30 && c3<=0x39)  { c3 = layer2getc(); LOG("\n"); }
+	 if(c3>=0x30 && c3<=0x39)  { c3 = layer2_getc(); LOG("\n"); }
 
 /*	 if(c3!=0x3b)  fprintf(stderr, "XCEPT: scrolling area - protocol !\n");
 */
-	 lower = layer2getc() & 0x0f;
+	 lower = layer2_getc() & 0x0f;
 	 LOG("\n");
-	 c3 = layer2getc();
+	 c3 = layer2_getc();
 	 if(c3>=0x30 && c3<=0x39)  lower = lower*10 + (c3&0x0f);
 	 LOG("       lower row: %2d", lower);
-	 if(c3>=0x30 && c3<=0x39)  { LOG("\n"); c3=layer2getc(); LOG("    "); }
+	 if(c3>=0x30 && c3<=0x39)  { LOG("\n"); c3=layer2_getc(); LOG("    "); }
 	 
 	 if(c3==0x55) {
 	    LOG("   CSA create scrolling area\n");
@@ -877,22 +877,22 @@ static void do_DRCS()   /* (page 139ff) */
 {
    int c3, c4, c5, c6, c7, c8;
 
-   c3 = layer2getc();
+   c3 = layer2_getc();
    if(c3 == 0x20) {
       LOG("       DRCS header unit\n");
-      c4 = layer2getc();
+      c4 = layer2_getc();
       if(c4==0x20 || c4==0x28) {
 	 LOG("          %s existing DRCS\n", (c4==0x20) ? "keep" : "delete");
 	 if(c4==0x28)  free_DRCS();
-	 c5 = layer2getc();
+	 c5 = layer2_getc();
       } else c5 = c4;
       if(c5 == 0x20) {
 	 LOG("\n");
-	 c6 = layer2getc();
+	 c6 = layer2_getc();
       } else c6 = c5;
       if(c6 == 0x40) {
 	 LOG("\n");
-	 c7 = layer2getc();
+	 c7 = layer2_getc();
       } else c7 = c6;
 
       switch(c7 & 0xf) {
@@ -928,7 +928,7 @@ static void do_DRCS()   /* (page 139ff) */
 	    break;
       }
 
-      c8 = layer2getc();
+      c8 = layer2_getc();
       LOG("          %d bit/pixel\n", c8 & 0xf);
       t.drcs_bits = c8 & 0xf;
       t.drcs_step = (t.drcs_h>=10 && t.drcs_w*t.drcs_bits==24)  ?  2 : 1;
@@ -955,7 +955,7 @@ static void do_DRCS_data(int c)
    if(t.drcs_h<10)  maxbytes *= 2;
    
    do {
-      c4 = layer2getc();
+      c4 = layer2_getc();
 
       switch(c4) {
          case 0x20:  /* S-bytes */
@@ -1027,7 +1027,7 @@ static void do_DRCS_data(int c)
 	    if(byte) {
 	       LOG("          new plane ahead - filling up\n");
 	       byte = maxbytes;   /* pad to full plane */
-	       layer2ungetc();
+	       layer2_ungetc();
 	    }
 	    else {
 	       LOG("          start of pattern block (plane %d)\n", c4 & 0xf);
@@ -1039,7 +1039,7 @@ static void do_DRCS_data(int c)
 	 default:
             if(c4<0x20 || c4>0x7f) {
 	       LOG("          end of pattern data\n");
-	       layer2ungetc();
+	       layer2_ungetc();
 	       if(byte)  byte = maxbytes;
 	    }
 	    else {   /* D-bytes */
@@ -1122,14 +1122,14 @@ static void do_DEFCOLOR()  /* (page 150ff) */
 {
    int c3, c4, c5, c6, c7, index, r, g, b;
 
-   c3 = layer2getc();
+   c3 = layer2_getc();
 
    switch(c3) {
 
       case 0x20:   /*  US 0x26 0x20 <ICT> <SUR> <SCM>  */
          LOG("       color header unit\n");
          t.col_modmap = 1;    /* by default modify colormap */
-         c4 = layer2getc();
+         c4 = layer2_getc();
          if((c4 & 0xf0) == 0x20) {
 	    if(c4!=0x20 && c4!=0x22) {
 	       LOG("*** <ICT>: bad value !\n");
@@ -1137,7 +1137,7 @@ static void do_DEFCOLOR()  /* (page 150ff) */
 	    }
             LOG("          <ICT>: load %s\n", c4==0x20 ? "colormap" : "DCLUT");
 	    t.col_modmap = (c4==0x20);
-            c5 = layer2getc();
+            c5 = layer2_getc();
          } else c5 = c4;
          if((c5 & 0xf0) == 0x20) {
             LOG("          <ICT>: (unit %d)\n", c5&0xf);
@@ -1145,7 +1145,7 @@ static void do_DEFCOLOR()  /* (page 150ff) */
 	       LOG("*** <ICT>: bad value !\n");
 	       fprintf(stderr, "XCEPT: do_DEFCOLOR(): ICT2 = 0x%02x\n", c5);
 	    }
-            c6 = layer2getc();
+            c6 = layer2_getc();
          } else c6 = c5;
          if((c6 & 0xf0) == 0x30) {
             LOG("          <SUR>: %d bits\n", c6&0xf);
@@ -1153,7 +1153,7 @@ static void do_DEFCOLOR()  /* (page 150ff) */
 	       LOG("*** <SUR>: bad value !\n");
 	       fprintf(stderr, "XCEPT: do_DEFCOLOR(): SUR = 0x%02x\n", c6);
 	    }
-            c7 = layer2getc();
+            c7 = layer2_getc();
          } else c7 = c6;
          if((c7 & 0xf0) == 0x40) {
             LOG("          <SCM>: 0x%02x\n", c7);
@@ -1163,7 +1163,7 @@ static void do_DEFCOLOR()  /* (page 150ff) */
 	    }
          } else {
             LOG("          default header\n");
-            layer2ungetc();
+            layer2_ungetc();
          }
          break;
 
@@ -1175,35 +1175,35 @@ static void do_DEFCOLOR()  /* (page 150ff) */
       default:
          LOG("       color transfer unit  (1.Stelle: %d)\n", c3&0xf);
 	 index = c3&0xf;
-         c4 = layer2getc();
+         c4 = layer2_getc();
          if((c4 & 0xf0) == 0x30) { /* c3 zehner, c4 einer */
             LOG("                            (2.Stelle: %d)\n", c4&0xf);
 	    index = (c3&0xf)*10 + (c4&0xf);
-            c5 = layer2getc();
+            c5 = layer2_getc();
          } else c5 = c4;
 
 	 if(t.col_modmap) {  /* load colormap */
 	    while(c5>=0x40 && c5<=0x7f) {
 	       LOG("          color #%2d:  R G B\n", index);
-	       c6 = layer2getc();
+	       c6 = layer2_getc();
 	       r = (c5&0x20)>>2 | (c5&0x04)    | (c6&0x20)>>4 | (c6&0x04)>>2;
 	       g = (c5&0x10)>>1 | (c5&0x02)<<1 | (c6&0x10)>>3 | (c6&0x02)>>1;
 	       b = (c5&0x08)    | (c5&0x01)<<2 | (c6&0x08)>>2 | (c6&0x01);
 	       LOG("                      %1x %1x %1x\n", r, g, b);
 	       if(index>=16 && index<=31)  define_color(index++, r, g, b);
-	       c5 = layer2getc();
+	       c5 = layer2_getc();
 	    }
 	 }
 	 else {  /* load DCLUT */
 	    while(c5>=0x40 && c5<=0x7f) {
 	       LOG("          DCLUT[%2d] = %2d\n", index, c5&0x1f);
 	       if(index>=0 && index<=3)  define_DCLUT(index++, c5&0x1f);
-	       c5 = layer2getc();
+	       c5 = layer2_getc();
 	    }
 	 }
 
 	 LOG("          end of color data\n");
-         layer2ungetc();
+         layer2_ungetc();
          break;
    }
 }
@@ -1217,7 +1217,7 @@ static void do_DEFFORMAT()   /* format designation  (page 155) */
    fontheight = 10;
    t.wrap  = 1;
    
-   c3 = layer2getc();
+   c3 = layer2_getc();
    if((c3&0xf0) == 0x40) {
       switch(c3) {
          case 0x41:
@@ -1232,7 +1232,7 @@ static void do_DEFFORMAT()   /* format designation  (page 155) */
 	    LOG("       unrecognized format (using default)\n");
 	    break;
       }
-      c4 = layer2getc();
+      c4 = layer2_getc();
    }
    else c4 = c3;
    
@@ -1242,7 +1242,7 @@ static void do_DEFFORMAT()   /* format designation  (page 155) */
    }
    else {
       LOG("       default format\n");
-      layer2ungetc();
+      layer2_ungetc();
    }
 }
 
@@ -1251,13 +1251,13 @@ static void do_RESET()  /* reset functions  (page 157) */
 {
    int y, c3, c4;
 
-   c3 = layer2getc();
+   c3 = layer2_getc();
 
    switch(c3) {
 
       case 0x40:   /* (page 158) */
          LOG("       service break to row\n");
-         c4 = layer2getc();
+         c4 = layer2_getc();
          LOG("          #%d\n", c4 & 0x3f);
          backup = t;  /* structure copy */
          t.leftright[0] = t.prim;  /* PFUSCH !!! */

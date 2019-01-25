@@ -1,4 +1,4 @@
-extern void connect_to_service(void);
-extern int layer2getc(void);
-extern void layer2ungetc(void);
-extern void layer2write(unsigned char *s, unsigned int len);
+extern void layer2_connect(void);
+extern int layer2_getc(void);
+extern void layer2_ungetc(void);
+extern void layer2_write(unsigned char *s, unsigned int len);
