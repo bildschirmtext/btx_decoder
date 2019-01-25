@@ -5,7 +5,7 @@ matrix:
   include:
     - osx_image: xcode10.1
       env: 
-        - SDK_VERSION=10.7 MACOSX_DEPLOYMENT_TARGET=10.7 SDKROOT=macosx10.7
+        - SDK_VERSION=10.7 SDKROOT=macosx10.7
 
 script:
   - |
@@ -16,6 +16,7 @@ script:
       ls -lh /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/
       plutil -replace MinimumSDKVersion -string ${MACOSX_DEPLOYMENT_TARGET} $(xcode-select -p)/Platforms/MacOSX.platform/Info.plist
       plutil -replace DTSDKName -string macosx${MACOSX_DEPLOYMENT_TARGET}internal $(xcode-select -p)/Platforms/MacOSX.platform/Info.plist
+      find . -type f -exec sed -i -e 's|10.13|10.7|g' {} \;
       set -o pipefail
       xcodebuild -project ./macOS/btx_decoder.xcodeproj -sdk macosx -arch x86_64
       mkdir -p out ; hdiutil create -format UDZO -srcfolder macOS/build/Release/ out/btx_decoder-$(git rev-parse --short HEAD).dmg
