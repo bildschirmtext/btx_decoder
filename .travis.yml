@@ -5,7 +5,7 @@ matrix:
   include:
     - osx_image: xcode10.1
       env: 
-        - SDK_VERSION=10.7 SDKROOT=MacOSX10.7.sdk
+        - SDK_VERSION=10.7 SDKROOT=macosx10.7
 
 script:
   - |
@@ -19,7 +19,7 @@ script:
       sed -i -e 's|MACOSX_DEPLOYMENT_TARGET = 10.13|MACOSX_DEPLOYMENT_TARGET = 10.7|g' ./macOS/btx_decoder.xcodeproj/project.pbxproj
       xcodebuild -version -sdk
       set -o pipefail
-      xcodebuild -project ./macOS/btx_decoder.xcodeproj -sdk MacOSX10.7.sdk -arch x86_64
+      xcodebuild -project ./macOS/btx_decoder.xcodeproj -sdk macosx10.7 -arch x86_64
       mkdir -p out ; hdiutil create -format UDZO -srcfolder macOS/build/Release/ out/btx_decoder-$(git rev-parse --short HEAD).dmg
     fi
 
