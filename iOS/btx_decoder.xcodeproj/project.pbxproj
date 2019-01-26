@@ -1,0 +1,379 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 50;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		CC5DD64C21FB48730038CEAC /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = CC5DD64B21FB48730038CEAC /* AppDelegate.m */; };
+		CC5DD64F21FB48730038CEAC /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CC5DD64E21FB48730038CEAC /* ViewController.m */; };
+		CC5DD65221FB48730038CEAC /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = CC5DD65021FB48730038CEAC /* Main.storyboard */; };
+		CC5DD65421FB48740038CEAC /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CC5DD65321FB48740038CEAC /* Assets.xcassets */; };
+		CC5DD65721FB48740038CEAC /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = CC5DD65521FB48740038CEAC /* LaunchScreen.storyboard */; };
+		CC5DD65A21FB48740038CEAC /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = CC5DD65921FB48740038CEAC /* main.m */; };
+		CC5DD67D21FB49520038CEAC /* rawfont.c in Sources */ = {isa = PBXBuildFile; fileRef = CC5DD67521FB49520038CEAC /* rawfont.c */; };
+		CC5DD67E21FB49520038CEAC /* layer2.c in Sources */ = {isa = PBXBuildFile; fileRef = CC5DD67721FB49520038CEAC /* layer2.c */; };
+		CC5DD67F21FB49520038CEAC /* xfont.c in Sources */ = {isa = PBXBuildFile; fileRef = CC5DD67821FB49520038CEAC /* xfont.c */; };
+		CC5DD68021FB49520038CEAC /* layer6.c in Sources */ = {isa = PBXBuildFile; fileRef = CC5DD67B21FB49520038CEAC /* layer6.c */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		CC5DD64721FB48730038CEAC /* btx_decoder.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = btx_decoder.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		CC5DD64A21FB48730038CEAC /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
+		CC5DD64B21FB48730038CEAC /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		CC5DD64D21FB48730038CEAC /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
+		CC5DD64E21FB48730038CEAC /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
+		CC5DD65121FB48730038CEAC /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		CC5DD65321FB48740038CEAC /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		CC5DD65621FB48740038CEAC /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		CC5DD65821FB48740038CEAC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		CC5DD65921FB48740038CEAC /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		CC5DD67121FB49520038CEAC /* rawfont.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = rawfont.h; path = ../../rawfont.h; sourceTree = "<group>"; };
+		CC5DD67221FB49520038CEAC /* xfont.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = xfont.h; path = ../../xfont.h; sourceTree = "<group>"; };
+		CC5DD67321FB49520038CEAC /* attrib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = attrib.h; path = ../../attrib.h; sourceTree = "<group>"; };
+		CC5DD67421FB49520038CEAC /* layer6.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = layer6.h; path = ../../layer6.h; sourceTree = "<group>"; };
+		CC5DD67521FB49520038CEAC /* rawfont.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = rawfont.c; path = ../../rawfont.c; sourceTree = "<group>"; };
+		CC5DD67621FB49520038CEAC /* control.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = control.h; path = ../../control.h; sourceTree = "<group>"; };
+		CC5DD67721FB49520038CEAC /* layer2.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = layer2.c; path = ../../layer2.c; sourceTree = "<group>"; };
+		CC5DD67821FB49520038CEAC /* xfont.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = xfont.c; path = ../../xfont.c; sourceTree = "<group>"; };
+		CC5DD67921FB49520038CEAC /* layer2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = layer2.h; path = ../../layer2.h; sourceTree = "<group>"; };
+		CC5DD67A21FB49520038CEAC /* font.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = font.h; path = ../../font.h; sourceTree = "<group>"; };
+		CC5DD67B21FB49520038CEAC /* layer6.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = layer6.c; path = ../../layer6.c; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		CC5DD64421FB48730038CEAC /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		CC5DD63E21FB48730038CEAC = {
+			isa = PBXGroup;
+			children = (
+				CC5DD66F21FB48B10038CEAC /* shared */,
+				CC5DD64921FB48730038CEAC /* btx_decoder */,
+				CC5DD64821FB48730038CEAC /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		CC5DD64821FB48730038CEAC /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				CC5DD64721FB48730038CEAC /* btx_decoder.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		CC5DD64921FB48730038CEAC /* btx_decoder */ = {
+			isa = PBXGroup;
+			children = (
+				CC5DD64A21FB48730038CEAC /* AppDelegate.h */,
+				CC5DD64B21FB48730038CEAC /* AppDelegate.m */,
+				CC5DD64D21FB48730038CEAC /* ViewController.h */,
+				CC5DD64E21FB48730038CEAC /* ViewController.m */,
+				CC5DD65021FB48730038CEAC /* Main.storyboard */,
+				CC5DD65321FB48740038CEAC /* Assets.xcassets */,
+				CC5DD65521FB48740038CEAC /* LaunchScreen.storyboard */,
+				CC5DD65821FB48740038CEAC /* Info.plist */,
+				CC5DD65921FB48740038CEAC /* main.m */,
+			);
+			path = btx_decoder;
+			sourceTree = "<group>";
+		};
+		CC5DD66F21FB48B10038CEAC /* shared */ = {
+			isa = PBXGroup;
+			children = (
+				CC5DD67321FB49520038CEAC /* attrib.h */,
+				CC5DD67621FB49520038CEAC /* control.h */,
+				CC5DD67A21FB49520038CEAC /* font.h */,
+				CC5DD67721FB49520038CEAC /* layer2.c */,
+				CC5DD67921FB49520038CEAC /* layer2.h */,
+				CC5DD67B21FB49520038CEAC /* layer6.c */,
+				CC5DD67421FB49520038CEAC /* layer6.h */,
+				CC5DD67521FB49520038CEAC /* rawfont.c */,
+				CC5DD67121FB49520038CEAC /* rawfont.h */,
+				CC5DD67821FB49520038CEAC /* xfont.c */,
+				CC5DD67221FB49520038CEAC /* xfont.h */,
+			);
+			name = shared;
+			path = btx_decoder;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		CC5DD64621FB48730038CEAC /* btx_decoder */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CC5DD65D21FB48740038CEAC /* Build configuration list for PBXNativeTarget "btx_decoder" */;
+			buildPhases = (
+				CC5DD64321FB48730038CEAC /* Sources */,
+				CC5DD64421FB48730038CEAC /* Frameworks */,
+				CC5DD64521FB48730038CEAC /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = btx_decoder;
+			productName = btx_decoder;
+			productReference = CC5DD64721FB48730038CEAC /* btx_decoder.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		CC5DD63F21FB48730038CEAC /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 1010;
+				ORGANIZATIONNAME = "Michael Steil";
+				TargetAttributes = {
+					CC5DD64621FB48730038CEAC = {
+						CreatedOnToolsVersion = 10.1;
+					};
+				};
+			};
+			buildConfigurationList = CC5DD64221FB48730038CEAC /* Build configuration list for PBXProject "btx_decoder" */;
+			compatibilityVersion = "Xcode 9.3";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = CC5DD63E21FB48730038CEAC;
+			productRefGroup = CC5DD64821FB48730038CEAC /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				CC5DD64621FB48730038CEAC /* btx_decoder */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		CC5DD64521FB48730038CEAC /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CC5DD65721FB48740038CEAC /* LaunchScreen.storyboard in Resources */,
+				CC5DD65421FB48740038CEAC /* Assets.xcassets in Resources */,
+				CC5DD65221FB48730038CEAC /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		CC5DD64321FB48730038CEAC /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CC5DD64F21FB48730038CEAC /* ViewController.m in Sources */,
+				CC5DD65A21FB48740038CEAC /* main.m in Sources */,
+				CC5DD64C21FB48730038CEAC /* AppDelegate.m in Sources */,
+				CC5DD67F21FB49520038CEAC /* xfont.c in Sources */,
+				CC5DD68021FB49520038CEAC /* layer6.c in Sources */,
+				CC5DD67D21FB49520038CEAC /* rawfont.c in Sources */,
+				CC5DD67E21FB49520038CEAC /* layer2.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		CC5DD65021FB48730038CEAC /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				CC5DD65121FB48730038CEAC /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		CC5DD65521FB48740038CEAC /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				CC5DD65621FB48740038CEAC /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		CC5DD65B21FB48740038CEAC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.1;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+			};
+			name = Debug;
+		};
+		CC5DD65C21FB48740038CEAC /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.1;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		CC5DD65E21FB48740038CEAC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				INFOPLIST_FILE = btx_decoder/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.pagetable.btx-decoder";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		CC5DD65F21FB48740038CEAC /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				INFOPLIST_FILE = btx_decoder/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.pagetable.btx-decoder";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		CC5DD64221FB48730038CEAC /* Build configuration list for PBXProject "btx_decoder" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CC5DD65B21FB48740038CEAC /* Debug */,
+				CC5DD65C21FB48740038CEAC /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		CC5DD65D21FB48740038CEAC /* Build configuration list for PBXNativeTarget "btx_decoder" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CC5DD65E21FB48740038CEAC /* Debug */,
+				CC5DD65F21FB48740038CEAC /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = CC5DD63F21FB48730038CEAC /* Project object */;
+}
