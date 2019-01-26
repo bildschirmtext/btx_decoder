@@ -17,8 +17,6 @@
 {
 	UIView *_btxView;
 	UITextField *_textField;
-	UIView *_inputView;
-	NSMutableArray<UIButton *> *_buttons;
 }
 
 - (BOOL)textField:(UITextField *)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string
@@ -38,23 +36,11 @@
 {
 	NSUInteger i = button.tag;
 	unsigned char c;
-#if 0
-	if (i < 9) {
-		c = '1' + i;
-	} else if (i == 9) {
-		c = INI;
-	} else if (i == 10) {
-		c = '0';
-	} else {
-		c = TER;
-	}
-#else
 	if (i) {
 		c = TER;
 	} else {
 		c = INI;
 	}
-#endif
 	layer2_write(&c, 1);
 }
 
@@ -79,62 +65,36 @@
 
 	const CGFloat kButtonSize = 50;
 
-#if 0
-	_inputView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, kButtonSize * 4)];
-	_buttons = [[NSMutableArray alloc] init];
-	for (NSUInteger i = 0; i < 12; i++) {
-		UIButton *button = [[UIButton alloc] init];
-		CGRect f;
-		f.origin = CGPointMake((i % 3) * kButtonSize, (i / 3) * kButtonSize + CGRectGetMaxY(_textField.frame));
-		f.size = CGSizeMake(kButtonSize, kButtonSize);
-		button.frame = f;
-		NSString *title;
-		if (i < 9) {
-			title = [NSString stringWithFormat:@"%lu", i + 1];
-		} else if (i == 9) {
-			title = @"*";
-		} else if (i == 10) {
-			title = @"0";
-		} else {
-			title = @"#";
-		}
-		[button setTitle:title forState:UIControlStateNormal];
-		button.tag = i;
-		button.backgroundColor = [UIColor darkGrayColor];
-		[button setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-		button.layer.borderColor = [UIColor grayColor].CGColor;
-		button.layer.borderWidth = .5;
-		[button addTarget:self action:@selector(buttonPressed:) forControlEvents:UIControlEventTouchUpInside];
-		[_buttons addObject:button];
-		[_inputView addSubview:button];
-	}
-#else
-	_inputView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, kButtonSize)];
+	const CGFloat kPlaceholderWidth = 100;
+	UIView *_inputAccessoryView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, kPlaceholderWidth, kButtonSize)];
 	for (NSUInteger i = 0; i < 2; i++) {
 		UIButton *button = [[UIButton alloc] init];
 		CGRect f;
 		f.origin = CGPointMake(0, 0);
 		f.size = CGSizeMake(kButtonSize, kButtonSize);
-		button.frame = CGRectMake(i * kButtonSize, 0, kButtonSize, kButtonSize);
+		button.frame = CGRectMake(i * kPlaceholderWidth / 2, 0, kPlaceholderWidth / 2, kButtonSize);
+		if (i == 0) {
+			button.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleRightMargin;
+		} else {
+			button.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleLeftMargin;
+		}
 		[button setTitle:i ? @"#" : @"*" forState:UIControlStateNormal];
-		button.backgroundColor = [UIColor darkGrayColor];
+		button.backgroundColor = [UIColor grayColor];
 		[button setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-		button.layer.borderColor = [UIColor grayColor].CGColor;
+		button.layer.borderColor = [UIColor lightGrayColor].CGColor;
 		button.layer.borderWidth = .5;
 		button.tag = i;
 		[button addTarget:self action:@selector(buttonPressed:) forControlEvents:UIControlEventTouchUpInside];
-		[_buttons addObject:button];
-		[_inputView addSubview:button];
+		[_inputAccessoryView addSubview:button];
 	}
-#endif
 
 	_textField = [[UITextField alloc] init];
 	[self.view addSubview:_textField];
 	_textField.text = @" ";
 	_textField.delegate = self;
 	_textField.autocapitalizationType = UITextAutocapitalizationTypeNone;
-//	_textField.inputView = _inputView;
-	_textField.inputAccessoryView = _inputView;
+	_textField.autocorrectionType = UITextAutocorrectionTypeNo;
+	_textField.inputAccessoryView = _inputAccessoryView;
 	_textField.alpha = 0;
 	[_textField becomeFirstResponder];
 
