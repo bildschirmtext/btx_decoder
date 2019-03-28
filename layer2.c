@@ -20,11 +20,17 @@ int is_last_char_buffered = 0;
 //#define HOST "belgradstr.dyndns.org"
 #define PORT 20000 /* XXX the original port for CEPT is 20005 */
 
-void layer2_connect() {
+void layer2_connect() 
+{
+	layer2_connect2(HOST,PORT);
+}
+
+void layer2_connect2(const char *host, const int port)
+{
     struct hostent *he;
     struct sockaddr_in their_addr;
     
-    if ((he = gethostbyname(HOST)) == NULL) {
+    if ((he = gethostbyname(host)) == NULL) {
         herror("gethostbyname");
         exit(1);
     }
@@ -35,7 +41,7 @@ void layer2_connect() {
     }
     
     their_addr.sin_family = AF_INET;
-    their_addr.sin_port = htons(PORT);
+    their_addr.sin_port = htons(port);
     their_addr.sin_addr = *((struct in_addr *)he->h_addr);
     bzero(&(their_addr.sin_zero), 8);
     
