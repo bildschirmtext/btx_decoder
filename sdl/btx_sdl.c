@@ -49,11 +49,19 @@ void update_pixels(uint32_t pixels[], const int w, const int h)
 
 void decoder_thread(void *x_void_ptr)
 {
-	fprintf(stderr,"init_xfont\n");
+	char conn[256];
+	memset(conn, 0, sizeof(conn));
+	strncpy(conn,(char *) x_void_ptr, sizeof(conn)-1);
+	char *collon=strrchr(conn, ':');
+	printf("decoder_thread %s --- %s\n", conn, collon);
+	unsigned int port=20000;
+	if (collon!=NULL) {
+		port=atoi(collon+1);
+		collon[0]='\0';
+		printf("Connecting to %s port %d\n", conn, port);
+	}
 	init_xfont();
-	fprintf(stderr,"init_layer2_connect2\n");
-	layer2_connect2("195.201.94.166", 20000);
-	fprintf(stderr,"init_layer6\n");
+	layer2_connect2(conn, port);
 	init_layer6();	
 	dirty=0;
 	while (quit) {
@@ -84,8 +92,13 @@ void handle_keydown(SDL_KeyboardEvent *key)
 
 int main(int argc, char ** argv)
 {	
+	if (argc!=2) {
+		printf("Usage: %s <host>:<port>\n", argv[0]);
+		printf("Example: %s 195.201.94.166:20000\n", argv[0]);
+		return 1;
+	}
 	pthread_t dec_thread;
-	if(pthread_create(&dec_thread, NULL, decoder_thread, NULL)) {
+	if(pthread_create(&dec_thread, NULL, decoder_thread, (void *) argv[1])) {
 		fprintf(stderr, "Error creating thread\n");
 		return 1;
 	}
