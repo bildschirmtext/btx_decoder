@@ -3,9 +3,14 @@
 #include <string.h>
 #include <strings.h>
 #include <unistd.h>
+#include <pthread.h>
 #include "../xfont.h"
 #include "../layer2.h"
 #include "../layer6.h"
+
+
+
+int quit=1;
 
 static int max(int a, int b)
 {
@@ -42,23 +47,48 @@ void update_pixels(uint32_t pixels[], const int w, const int h)
 	}
 }
 
-void init_btx(char *conn)
+void decoder_thread(void *x_void_ptr)
 {
 	fprintf(stderr,"init_xfont\n");
 	init_xfont();
 	fprintf(stderr,"init_layer2_connect2\n");
-	layer2_connect2("localhost", 20000);
+	layer2_connect2("195.201.94.166", 20000);
 	fprintf(stderr,"init_layer6\n");
 	init_layer6();	
+	dirty=0;
+	while (quit) {
+		process_BTX_data();
+	}
+}
+
+void handle_textinput(char *s)
+{
+	int len=strlen(s);	
+	printf("handle_textinput len=%d %s\n", len, s);
+	layer2_write(s, len);	
+}
+
+void handle_keydown(SDL_KeyboardEvent *key)
+{
+	SDL_Keycode k=key->keysym.sym;
+	if (k==SDLK_F1) layer2_write("\x13",1); //Initiator *
+	if (k==SDLK_F2) layer2_write("\x1c",1); //Terminator #
+	if (k==SDLK_LEFT) layer2_write("\x08",1); //left
+	if (k==SDLK_RIGHT) layer2_write("\x09",1); //right
+	if (k==SDLK_UP) layer2_write("\x0b",1); //Up
+	if (k==SDLK_DOWN) layer2_write("\x0a",1); //Down
+	if (k==SDLK_RETURN) layer2_write("\x0d",1); //Return
+	if (k==SDLK_HOME) layer2_write("\x1e",1); //Active Position home
 }
 
 
 int main(int argc, char ** argv)
-{
-	int quit=1;
-	SDL_Event event;
-
-	init_btx(NULL);
+{	
+	pthread_t dec_thread;
+	if(pthread_create(&dec_thread, NULL, decoder_thread, NULL)) {
+		fprintf(stderr, "Error creating thread\n");
+		return 1;
+	}
 
 	int width=480;
 	int height=480;
@@ -73,18 +103,26 @@ int main(int argc, char ** argv)
 	uint32_t pixels[width*height];
 
 	memset(pixels, 0xaa, width*height * sizeof(Uint32));
-
+	SDL_StartTextInput();
 	while (quit!=0)
 	{
-		int btx_res=process_BTX_data();
-		printf("process_BTX_data=%d\n",btx_res);
-		update_pixels(pixels, width, height);
-		SDL_UpdateTexture(texture, NULL, pixels, width * sizeof(Uint32));
+		int draw=0;
+		if (dirty!=0) {
+			dirty=0;
+			draw=1;
+		}
 		int eventtimeout=40;
-		if (btx_res==0) eventtimeout=0;
-		SDL_WaitEventTimeout(&event,40);
+		if (draw!=0) eventtimeout=10;
+		SDL_Event event;
+		SDL_WaitEventTimeout(&event,250);
 		switch (event.type)
 		{
+			case SDL_TEXTINPUT:
+				handle_textinput(event.text.text);
+			break;
+			case SDL_KEYDOWN:
+				handle_keydown(&event.key);
+			break;
 			case SDL_QUIT:
 				quit = 0;
 			break;
@@ -94,12 +132,16 @@ int main(int argc, char ** argv)
 			case SDL_MOUSEMOTION:
 			break;
 		}
-
-		SDL_RenderClear(renderer);
-		SDL_RenderCopy(renderer, texture, NULL, NULL);
-		SDL_RenderPresent(renderer);
+		if (draw!=0) {
+			update_pixels(pixels, width, height);
+			SDL_UpdateTexture(texture, NULL, pixels, width * sizeof(Uint32));
+			SDL_RenderClear(renderer);
+			SDL_RenderCopy(renderer, texture, NULL, NULL);
+			SDL_RenderPresent(renderer);
+		}
 	}
 
+	SDL_StopTextInput();
 	SDL_DestroyTexture(texture);
 	SDL_DestroyRenderer(renderer);
 	
