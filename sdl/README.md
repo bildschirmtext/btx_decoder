@@ -4,4 +4,4 @@ make
 Command-Line Parameters:
 ========================
 
-./btx-sdl <host>:<port>
+./btx-sdl \<host\>:\<port\>
