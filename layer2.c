@@ -16,14 +16,21 @@ int sockfd;
 unsigned char last_char;
 int is_last_char_buffered = 0;
 
-#define HOST "belgradstr.dyndns.org"
+#define HOST "localhost"
+//#define HOST "belgradstr.dyndns.org"
 #define PORT 20000 /* XXX the original port for CEPT is 20005 */
 
-void connect_to_service() {
+void layer2_connect() 
+{
+	layer2_connect2(HOST,PORT);
+}
+
+void layer2_connect2(const char *host, const int port)
+{
     struct hostent *he;
     struct sockaddr_in their_addr;
     
-    if ((he = gethostbyname(HOST)) == NULL) {
+    if ((he = gethostbyname(host)) == NULL) {
         herror("gethostbyname");
         exit(1);
     }
@@ -34,7 +41,7 @@ void connect_to_service() {
     }
     
     their_addr.sin_family = AF_INET;
-    their_addr.sin_port = htons(PORT);
+    their_addr.sin_port = htons(port);
     their_addr.sin_addr = *((struct in_addr *)he->h_addr);
     bzero(&(their_addr.sin_zero), 8);
     
@@ -44,7 +51,7 @@ void connect_to_service() {
     }
 }
 
-int layer2getc()
+int layer2_getc()
 {
     if (is_last_char_buffered) {
         is_last_char_buffered = 0;
@@ -58,12 +65,12 @@ int layer2getc()
     return last_char;
 }
 
-void layer2ungetc()
+void layer2_ungetc()
 {
     is_last_char_buffered = 1;
 }
 
-void layer2write(unsigned char *s, unsigned int len)
+void layer2_write(const unsigned char *s, unsigned int len)
 {
     if (send(sockfd, s, len, 0) == -1){
         perror("send");

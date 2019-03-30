@@ -2,7 +2,7 @@
 
 BTX Decoder ist ein Client für den Bildschirmtext Onlinedienst. Er basiert auf der Decoder-Logik der BSD-lizensierten Software "XCept 2.1" von 1995 und wurde an moderne C-Compiler angepaßt.
 
-Der Kern des Decoders ist portables C mit minimalen Betriebssystem-Abhängigkeiten. Im Moment existiert ein Frontend für macOS.
+Der Kern des Decoders ist portables C mit minimalen Betriebssystem-Abhängigkeiten. Im Moment existieren Frontends für macOS und iOS.
 
 ## Copyright von XCept 2.1
 

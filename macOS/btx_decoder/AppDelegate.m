@@ -167,7 +167,7 @@ static CVReturn renderCallback(__unused CVDisplayLinkRef displayLink,
         default:
             c[0] = ch;
     }
-    layer2write(c, len);
+    layer2_write(c, len);
 }
 
 
@@ -204,7 +204,7 @@ static CVReturn renderCallback(__unused CVDisplayLinkRef displayLink,
     init_xfont();
     init_layer6();
 
-    connect_to_service();
+    layer2_connect();
     
     // Thread 1: Decoder    
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
