@@ -1,11 +1,19 @@
-os: osx
-language: objective-c
-
 matrix:
   include:
-    - osx_image: xcode10.1
+    - os: linux
+      language: c
+      dist: trusty
+      sudo: required
+    - os: osx
+      language: objc
+      osx_image: xcode10.1
       env: 
         - SDK_VERSION=10.9 SDKROOT=macosx10.9
+
+addons:
+  apt:
+    packages:
+      - libsdl2-dev
 
 script:
   - |
@@ -21,6 +29,18 @@ script:
       set -o pipefail
       xcodebuild -project ./macOS/btx_decoder.xcodeproj -sdk $SDKROOT -arch x86_64
       mkdir -p out ; hdiutil create -format UDZO -srcfolder macOS/build/Release/ out/btx_decoder-$(git rev-parse --short HEAD).dmg
+    elif [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+      cd sdl/
+      make
+      strip btx-sdl
+      mkdir -p appdir/usr/bin ; cp btx-sdl appdir/usr/bin/
+      mkdir -p appdir/usr/share/icons/hicolor/256x256/apps ; cp bildschirmtext.png appdir/usr/share/icons/hicolor/256x256/apps/
+      mkdir -p appdir/usr/share/applications ; cp btx-sdl.desktop appdir/usr/share/applications/
+      wget -c -nv "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
+      chmod a+x linuxdeployqt-continuous-x86_64.AppImage
+      ./linuxdeployqt-continuous-x86_64.AppImage appdir/usr/share/applications/*.desktop -appimage
+      mkdir -p ../out ; cp btx-sdl BTX*.AppImage* ../out/
+      cd ..
     fi
 
 after_success:

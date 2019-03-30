@@ -46,6 +46,9 @@
 #include "font.h"
 #include "attrib.h"
 
+/* sys_errlist is deprecated. TODO: Use strerror instead. */
+extern __const char *__const sys_errlist[];
+
 /* exported variables */
 // TODO: hook 
 int tia = 0;    /* 1: white-on-black mode, no attributes */

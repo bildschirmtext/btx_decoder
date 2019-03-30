@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=BTX Decoder
+Comment=Bildschirmtext (BTX) decoder
+Exec=btx-sdl
+Icon=bildschirmtext
+Type=Application
+Categories=Network;

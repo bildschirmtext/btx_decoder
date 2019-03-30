@@ -3,6 +3,8 @@
 #include <string.h>
 #include <netdb.h>
 
+#define h_addr h_addr_list[0] /* for backward compatibility */
+
 /*
  * The original Bildschirmtext service over modem supported
  * error correction in the form of checksummed sequences and
