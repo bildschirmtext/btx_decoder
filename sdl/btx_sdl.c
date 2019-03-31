@@ -11,6 +11,7 @@
 
 
 int quit=1;
+int keyboard_mode=0;
 
 static int max(int a, int b)
 {
@@ -69,24 +70,96 @@ void decoder_thread(void *x_void_ptr)
 	}
 }
 
+//Translation table for special characters
+#define KM_NORMAL (0)
+#define KM_FCOLOR (1)
+#define KM_BCOLOR (2)
+#define KM_SIZE (3)
+struct {
+	int mode; //Mode: 0=normal
+	char *input;
+	char *output;
+} translations[]={
+	{KM_NORMAL,	"Ä",	"\x19HA"},
+	{KM_NORMAL,	"Ö",	"\x19HO"},
+	{KM_NORMAL,	"Ü",	"\x19HU"},
+	{KM_NORMAL,	"ä",	"\x19Ha"},
+	{KM_NORMAL,	"ö",	"\x19Ho"},
+	{KM_NORMAL,	"ü",	"\x19Hu"},
+	{KM_NORMAL,	"ß",	"\x1d\x3b"},
+	{KM_NORMAL,	"¡",	"\x19\x21"},
+	{KM_NORMAL,	"¢",	"\x19\x22"},
+	{KM_NORMAL,	"£",	"\x19\x23"},
+	{KM_NORMAL,	"$",	"\x19\x24"},
+	{KM_NORMAL,	"¥",	"\x19\x25"},
+	{KM_NORMAL,	"#",	"\x19\x26"},
+	{KM_NORMAL,	"§",	"\x19\x27"},
+	{KM_NORMAL,	"¤",	"\x19\x28"},
+	{KM_NORMAL,	"‘",	"\x19\x29"},
+	{KM_NORMAL,	"“",	"\x19\x2A"},
+	{KM_FCOLOR,	"0",	"\x80"},
+	{KM_FCOLOR,	"1",	"\x81"},
+	{KM_FCOLOR,	"2",	"\x82"},
+	{KM_FCOLOR,	"3",	"\x83"},
+	{KM_FCOLOR,	"4",	"\x84"},
+	{KM_FCOLOR,	"5",	"\x85"},
+	{KM_FCOLOR,	"6",	"\x86"},
+	{KM_FCOLOR,	"7",	"\x87"},
+	{KM_BCOLOR,	"0",	"\x90"},
+	{KM_BCOLOR,	"1",	"\x91"},
+	{KM_BCOLOR,	"2",	"\x92"},
+	{KM_BCOLOR,	"3",	"\x93"},
+	{KM_BCOLOR,	"4",	"\x94"},
+	{KM_BCOLOR,	"5",	"\x95"},
+	{KM_BCOLOR,	"6",	"\x96"},
+	{KM_BCOLOR,	"7",	"\x97"},
+	{KM_SIZE,	"0",	"\x8C"},
+	{KM_SIZE,	"1",	"\x8D"},
+	{KM_SIZE,	"2",	"\x8E"},
+	{KM_SIZE,	"3",	"\x8F"},
+};
+
+#define TRANSLATIONCNT (sizeof(translations)/sizeof(translations[0]))
+
 void handle_textinput(char *s)
 {
-	int len=strlen(s);	
-	printf("handle_textinput len=%d %s\n", len, s);
-	layer2_write(s, len);	
+	size_t len=strlen(s);	
+	if (len>31) len=31;
+	char buf[32];
+	memset(buf, 0, sizeof(buf));
+	memcpy(buf, s, len);
+	char *out=buf;
+	int n;
+	for (n=0; n<TRANSLATIONCNT; n++) {
+		if ((strcmp(buf,translations[n].input)==0) && (translations[n].mode=keyboard_mode)) {
+			out=translations[n].output;
+			break;
+		}
+	}
+	keyboard_mode=KM_NORMAL;
+	layer2_write(out, strlen(out));	
 }
 
 void handle_keydown(SDL_KeyboardEvent *key)
 {
 	SDL_Keycode k=key->keysym.sym;
-	if (k==SDLK_F1) layer2_write("\x13",1); //Initiator *
-	if (k==SDLK_F2) layer2_write("\x1c",1); //Terminator #
-	if (k==SDLK_LEFT) layer2_write("\x08",1); //left
-	if (k==SDLK_RIGHT) layer2_write("\x09",1); //right
-	if (k==SDLK_UP) layer2_write("\x0b",1); //Up
-	if (k==SDLK_DOWN) layer2_write("\x0a",1); //Down
-	if (k==SDLK_RETURN) layer2_write("\x0d",1); //Return
-	if (k==SDLK_HOME) layer2_write("\x1e",1); //Active Position home
+	unsigned int mod=key->keysym.mod;
+	if (k==SDLK_F1)		layer2_write("\x13",1); //F1 => Initiator *
+	if (k==SDLK_F2)		layer2_write("\x1c",1); //F2 => Terminator #
+	if (k==SDLK_F3) {
+		if (mod==KMOD_NONE)		keyboard_mode=KM_FCOLOR; //F3 => Foreground color
+		if ((mod&KMOD_SHIFT)!=0)	keyboard_mode=KM_BCOLOR; //Shift+F3 => Background color
+	}
+	if (k==SDLK_F4) 	keyboard_mode=KM_SIZE; //F4 => Size
+	if (k==SDLK_F12)	layer2_write("\x1a",3); //F12 => DCT
+	if (k==SDLK_LEFT) 	layer2_write("\x08",1); //left
+	if (k==SDLK_RIGHT) 	layer2_write("\x09",1); //right
+	if (k==SDLK_UP) 	layer2_write("\x0b",1); //Up
+	if (k==SDLK_DOWN)	layer2_write("\x0a",1); //Down
+	if ((k==SDLK_RETURN) && (mod==KMOD_NONE)) layer2_write("\x0d",1); //Return
+	if ((k==SDLK_RETURN) && (mod==KMOD_SHIFT)) layer2_write("\x18",1); //Return+Shift => Erase till end of line
+	if (k==SDLK_HOME)	layer2_write("\x1e",1); //Active Position home
+	if (k==SDLK_BACKSPACE)	layer2_write("\x08 \x08",3);
 }
 
 
@@ -103,8 +176,8 @@ int main(int argc, char ** argv)
 		return 1;
 	}
 
-	int width=480;
-	int height=480;
+	int width=480*2;
+	int height=240*3;
 
 	SDL_Init(SDL_INIT_VIDEO);
 
@@ -145,13 +218,11 @@ int main(int argc, char ** argv)
 			case SDL_MOUSEMOTION:
 			break;
 		}
-		if (draw!=0) {
-			update_pixels(pixels, width, height);
-			SDL_UpdateTexture(texture, NULL, pixels, width * sizeof(Uint32));
-			SDL_RenderClear(renderer);
-			SDL_RenderCopy(renderer, texture, NULL, NULL);
-			SDL_RenderPresent(renderer);
-		}
+		update_pixels(pixels, width, height);
+		SDL_UpdateTexture(texture, NULL, pixels, width * sizeof(Uint32));
+		SDL_RenderClear(renderer);
+		SDL_RenderCopy(renderer, texture, NULL, NULL);
+		SDL_RenderPresent(renderer);
 	}
 
 	SDL_StopTextInput();
