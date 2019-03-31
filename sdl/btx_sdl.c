@@ -75,11 +75,13 @@ void decoder_thread(void *x_void_ptr)
 #define KM_FCOLOR (1)
 #define KM_BCOLOR (2)
 #define KM_SIZE (3)
+#define KM_ATTR (3)
 struct {
 	int mode; //Mode: 0=normal
 	char *input;
 	char *output;
 } translations[]={
+	//Special printable characters
 	{KM_NORMAL,	"Ä",	"\x19HA"},
 	{KM_NORMAL,	"Ö",	"\x19HO"},
 	{KM_NORMAL,	"Ü",	"\x19HU"},
@@ -97,6 +99,8 @@ struct {
 	{KM_NORMAL,	"¤",	"\x19\x28"},
 	{KM_NORMAL,	"‘",	"\x19\x29"},
 	{KM_NORMAL,	"“",	"\x19\x2A"},
+	//Colours
+	//Foreground
 	{KM_FCOLOR,	"0",	"\x80"},
 	{KM_FCOLOR,	"1",	"\x81"},
 	{KM_FCOLOR,	"2",	"\x82"},
@@ -105,6 +109,12 @@ struct {
 	{KM_FCOLOR,	"5",	"\x85"},
 	{KM_FCOLOR,	"6",	"\x86"},
 	{KM_FCOLOR,	"7",	"\x87"},
+	//Colour tables
+	{KM_FCOLOR,	"a",	"\x1B\x30\x40"},
+	{KM_FCOLOR,	"b",	"\x1B\x31\x40"},
+	{KM_FCOLOR,	"c",	"\x1B\x32\x40"},
+	{KM_FCOLOR,	"d",	"\x1B\x33\x40"},
+	//Background
 	{KM_BCOLOR,	"0",	"\x90"},
 	{KM_BCOLOR,	"1",	"\x91"},
 	{KM_BCOLOR,	"2",	"\x92"},
@@ -113,10 +123,19 @@ struct {
 	{KM_BCOLOR,	"5",	"\x95"},
 	{KM_BCOLOR,	"6",	"\x96"},
 	{KM_BCOLOR,	"7",	"\x97"},
+	{KM_BCOLOR,	"t",	"\x9E"},
+	//Attributes
+	//Size
 	{KM_SIZE,	"0",	"\x8C"},
 	{KM_SIZE,	"1",	"\x8D"},
 	{KM_SIZE,	"2",	"\x8E"},
 	{KM_SIZE,	"3",	"\x8F"},
+	//Underline
+	{KM_ATTR,	'L',	"\x9A"}, //Start (under) Lining
+	{KM_ATTR,	'l',	"\x99"}, //Start (under) Lining
+	//Polarity	
+	{KM_ATTR,	"I",	"\x9D"}, //Inverted Polarity
+	{KM_ATTR,	"i",	"\x9C"}, //Normal Polarity
 };
 
 #define TRANSLATIONCNT (sizeof(translations)/sizeof(translations[0]))
@@ -158,7 +177,10 @@ void handle_keydown(SDL_KeyboardEvent *key)
 	if (k==SDLK_DOWN)	layer2_write("\x0a",1); //Down
 	if ((k==SDLK_RETURN) && (mod==KMOD_NONE)) layer2_write("\x0d",1); //Return
 	if ((k==SDLK_RETURN) && (mod==KMOD_SHIFT)) layer2_write("\x18",1); //Return+Shift => Erase till end of line
-	if (k==SDLK_HOME)	layer2_write("\x1e",1); //Active Position home
+	if (k==SDLK_HOME) {
+		if (mod==KMOD_NONE) layer2_write("\x1e",1); //Active Position home
+		if ((mod&KMOD_SHIFT)!=0) layer2_write("\x0c",1); //Clear Screen
+	}
 	if (k==SDLK_BACKSPACE)	layer2_write("\x08 \x08",3);
 }
 
