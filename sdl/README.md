@@ -4,7 +4,6 @@ make
 Command-Line Parameters:
 ========================
 
-<<<<<<< HEAD
 ./btx-sdl <host>:<port>
 
 
@@ -12,7 +11,9 @@ Keyboard Shortcuts:
 ===================
 
 F1: initiator *
+
 F2: terminator #
+
 F3: 0-7, A-D set foreground color
 	0: black
 	1: red
@@ -26,6 +27,7 @@ F3: 0-7, A-D set foreground color
 	b: invoke table 2
 	c: invoke table 3
 	d: invoke table 4
+
 Shift+F3: 0-7 set background color
 	0: black
 	1: red
@@ -36,6 +38,7 @@ Shift+F3: 0-7 set background color
 	6: cyan
 	7: white
 	t: transparent background
+
 F4: 0-3 set size and other attributes
 	0: normal
 	1: double height
@@ -45,12 +48,14 @@ F4: 0-3 set size and other attributes
 	l: stop (under) lining
 	I: Inverse polarity
 	i: normal polarity
+
 F12: send DCT (end page entry)
+
 Pos1: go to home position
+
 Shift+Pos1: clear screen
 
 Shift+Return: CAN delete till end of line
 
 =======
 ./btx-sdl \<host\>:\<port\>
->>>>>>> 91a12a2d23a9b6db284ccdb3692c7ea43e58c44a
