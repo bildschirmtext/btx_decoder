@@ -76,6 +76,7 @@ void decoder_thread(void *x_void_ptr)
 #define KM_BCOLOR (2)
 #define KM_SIZE (3)
 #define KM_ATTR (3)
+#define KM_GSHIFT (4)
 struct {
 	int mode; //Mode: 0=normal
 	char *input;
@@ -110,10 +111,10 @@ struct {
 	{KM_FCOLOR,	"6",	"\x86"},
 	{KM_FCOLOR,	"7",	"\x87"},
 	//Colour tables
-	{KM_FCOLOR,	"a",	"\x1B\x30\x40"},
-	{KM_FCOLOR,	"b",	"\x1B\x31\x40"},
-	{KM_FCOLOR,	"c",	"\x1B\x32\x40"},
-	{KM_FCOLOR,	"d",	"\x1B\x33\x40"},
+	{KM_FCOLOR,	"a",	"\x9B\x30\x40"},
+	{KM_FCOLOR,	"b",	"\x9B\x31\x40"},
+	{KM_FCOLOR,	"c",	"\x9B\x32\x40"},
+	{KM_FCOLOR,	"d",	"\x9B\x33\x40"},
 	//Background
 	{KM_BCOLOR,	"0",	"\x90"},
 	{KM_BCOLOR,	"1",	"\x91"},
@@ -136,6 +137,11 @@ struct {
 	//Polarity	
 	{KM_ATTR,	"I",	"\x9D"}, //Inverted Polarity
 	{KM_ATTR,	"i",	"\x9C"}, //Normal Polarity
+	//Character set switching
+	{KM_GSHIFT,	"0",	"\x0F"}, //Locking Shift G0
+	{KM_GSHIFT,	"1",	"\x0E"}, //Locking Shift G1
+	{KM_GSHIFT,	"2",	"\x19"}, //Single Shift G2
+	{KM_GSHIFT,	"3",	"\x1D"}, //Single Shift G3
 };
 
 #define TRANSLATIONCNT (sizeof(translations)/sizeof(translations[0]))
@@ -170,6 +176,7 @@ void handle_keydown(SDL_KeyboardEvent *key)
 		if ((mod&KMOD_SHIFT)!=0)	keyboard_mode=KM_BCOLOR; //Shift+F3 => Background color
 	}
 	if (k==SDLK_F4) 	keyboard_mode=KM_SIZE; //F4 => Size
+	if (k==SDLK_F5) 	keyboard_mode=KM_GSHIFT; //F5 => Charactersets
 	if (k==SDLK_F12)	layer2_write("\x1a",1); //F12 => DCT
 	if (k==SDLK_LEFT) 	layer2_write("\x08",1); //left
 	if (k==SDLK_RIGHT) 	layer2_write("\x09",1); //right

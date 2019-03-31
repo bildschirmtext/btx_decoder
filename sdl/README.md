@@ -49,6 +49,13 @@ F4: 0-3 set size and other attributes
 * I: Inverse polarity
 * i: normal polarity
 
+F5: switch character set
+* 0: Switch to G0 (locking)
+* 1: Switch to G1 (locking)
+* 2: Switch to G2 (single)
+* 3: Switch to G3 (single)
+
+
 F12: send DCT (end page entry)
 
 Pos1: go to home position
