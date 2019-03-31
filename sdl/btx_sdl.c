@@ -131,8 +131,8 @@ struct {
 	{KM_SIZE,	"2",	"\x8E"},
 	{KM_SIZE,	"3",	"\x8F"},
 	//Underline
-	{KM_ATTR,	'L',	"\x9A"}, //Start (under) Lining
-	{KM_ATTR,	'l',	"\x99"}, //Start (under) Lining
+	{KM_ATTR,	"L",	"\x9A"}, //Start (under) Lining
+	{KM_ATTR,	"l",	"\x99"}, //Start (under) Lining
 	//Polarity	
 	{KM_ATTR,	"I",	"\x9D"}, //Inverted Polarity
 	{KM_ATTR,	"i",	"\x9C"}, //Normal Polarity
@@ -150,7 +150,7 @@ void handle_textinput(char *s)
 	char *out=buf;
 	int n;
 	for (n=0; n<TRANSLATIONCNT; n++) {
-		if ((strcmp(buf,translations[n].input)==0) && (translations[n].mode=keyboard_mode)) {
+		if ((strcmp(buf,translations[n].input)==0) && (translations[n].mode==keyboard_mode)) {
 			out=translations[n].output;
 			break;
 		}
