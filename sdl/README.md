@@ -55,6 +55,8 @@ Pos1: go to home position
 
 Shift+Pos1: clear screen
 
+Return: Return to left and one line Down
+Alt+Return: Return to left
 Shift+Return: CAN delete till end of line
 
 =======

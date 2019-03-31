@@ -88,7 +88,7 @@ struct {
 	{KM_NORMAL,	"ä",	"\x19Ha"},
 	{KM_NORMAL,	"ö",	"\x19Ho"},
 	{KM_NORMAL,	"ü",	"\x19Hu"},
-	{KM_NORMAL,	"ß",	"\x1d\x3b"},
+	{KM_NORMAL,	"ß",	"\x19\x7b"},
 	{KM_NORMAL,	"¡",	"\x19\x21"},
 	{KM_NORMAL,	"¢",	"\x19\x22"},
 	{KM_NORMAL,	"£",	"\x19\x23"},
@@ -170,13 +170,16 @@ void handle_keydown(SDL_KeyboardEvent *key)
 		if ((mod&KMOD_SHIFT)!=0)	keyboard_mode=KM_BCOLOR; //Shift+F3 => Background color
 	}
 	if (k==SDLK_F4) 	keyboard_mode=KM_SIZE; //F4 => Size
-	if (k==SDLK_F12)	layer2_write("\x1a",3); //F12 => DCT
+	if (k==SDLK_F12)	layer2_write("\x1a",1); //F12 => DCT
 	if (k==SDLK_LEFT) 	layer2_write("\x08",1); //left
 	if (k==SDLK_RIGHT) 	layer2_write("\x09",1); //right
 	if (k==SDLK_UP) 	layer2_write("\x0b",1); //Up
 	if (k==SDLK_DOWN)	layer2_write("\x0a",1); //Down
-	if ((k==SDLK_RETURN) && (mod==KMOD_NONE)) layer2_write("\x0d",1); //Return
-	if ((k==SDLK_RETURN) && (mod==KMOD_SHIFT)) layer2_write("\x18",1); //Return+Shift => Erase till end of line
+	if (k==SDLK_RETURN) {
+		if ((mod==KMOD_NONE)) layer2_write("\x0d\x0a",2); //Return and New Line
+		if ((mod&KMOD_ALT)!=0) layer2_write("\x0d",1); //Return
+		if ((mod&KMOD_SHIFT)!=0) layer2_write("\x18",1); //Return+Shift => Erase till end of line
+	}
 	if (k==SDLK_HOME) {
 		if (mod==KMOD_NONE) layer2_write("\x1e",1); //Active Position home
 		if ((mod&KMOD_SHIFT)!=0) layer2_write("\x0c",1); //Clear Screen
