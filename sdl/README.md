@@ -4,8 +4,7 @@ make
 Command-Line Parameters:
 ========================
 
-./btx-sdl <host>:<port>
-
+./btx-sdl \<host\>:\<port\>
 
 Keyboard Shortcuts:
 ===================
@@ -66,5 +65,4 @@ Return: Return to left and one line Down
 Alt+Return: Return to left
 Shift+Return: CAN delete till end of line
 
-=======
-./btx-sdl \<host\>:\<port\>
+
