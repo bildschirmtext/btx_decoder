@@ -39,6 +39,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <errno.h>
+#include <stdint.h>
 #include "layer6.h"
 #include "layer2.h"
 #include "xfont.h"
@@ -74,6 +75,8 @@ static struct {
    int scroll_upper, scroll_lower;
    int scroll_impl, scroll_area;
    int hold_mosaic;
+   uint8_t blinkmode; //0=steady; 1=normal; 2=inverted; 3=reduced intensity
+   uint8_t blinkrate; //0=1Hz 50%; 1..3=2Hz 33% phase 0..2; 4=leftwards; 5=rightwards
 } t, backup;
 struct screen_cell screen[24][40];   /* information for every character */
 int rows, fontheight;                /* 20 rows(12 high) or 24 rows(10 high) */
@@ -120,6 +123,8 @@ void init_layer6()
    t.par_attr = 0;
    t.par_fg = WHITE;
    t.par_bg = TRANSPARENT;
+   t.blinkmode=0;
+   t.blinkrate=0;
    for(y=0; y<24; y++)  define_fullrow_bg(y, BLACK);
    clearscreen();
    default_sets();
@@ -415,7 +420,7 @@ static void supplementary_control_C1(int c1, int fullrow)  /* page 121, annex 6 
 	     (mode==1) ? "(+ unload L set)" : "");
 	 set_attr(ATTR_FOREGROUND, 1, t.clut*8+c1-0x80, mode);
 	 if(mode==1) {
-	    t.leftright[0] = t.save_left;
+	    t.leftright[0] = G0;//t.save_left;
 	 }
          break;
 
@@ -1687,6 +1692,7 @@ static void clearscreen()
 	 screen[y][x].mark = 0;
 	 screen[y][x].fg = WHITE;
 	 screen[y][x].bg = TRANSPARENT;
+	 screen[y][x].blinkmode = 0;
       }
 
    redraw_screen_rect(0, 0, 39, rows-1);
