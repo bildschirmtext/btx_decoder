@@ -420,7 +420,8 @@ static void supplementary_control_C1(int c1, int fullrow)  /* page 121, annex 6 
 	     (mode==1) ? "(+ unload L set)" : "");
 	 set_attr(ATTR_FOREGROUND, 1, t.clut*8+c1-0x80, mode);
 	 if(mode==1) {
-	    t.leftright[0] = G0;//t.save_left;
+	    t.leftright[0] = G0;
+	    t.hold_mosaic = 0;
 	 }
          break;
 
