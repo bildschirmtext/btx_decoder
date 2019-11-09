@@ -422,6 +422,7 @@ static void supplementary_control_C1(int c1, int fullrow)  /* page 121, annex 6 
 	 if(mode==1) {
 	    t.leftright[0] = G0;
 	    t.hold_mosaic = 0;
+	    t.lastchar=' ';
 	 }
          break;
 
@@ -481,6 +482,9 @@ static void supplementary_control_C1(int c1, int fullrow)  /* page 121, annex 6 
 	 if(mode==1) {
 	    set_attr(ATTR_FOREGROUND, 1, t.clut*8+c1-0x90, 1);
 	    t.save_left = t.leftright[0];
+	    if (t.leftright[0]!=L) {
+		t.lastchar=' ';
+	    }
 	    t.leftright[0] = L;
 	 }
 	 else set_attr(ATTR_BACKGROUND, 1, t.clut*8+c1-0x90, mode);
@@ -540,6 +544,7 @@ static void supplementary_control_C1(int c1, int fullrow)  /* page 121, annex 6 
       case 0x9f:
          if(mode==1) {
             LOG("RMS release mosaic\n");
+	    t.lastchar=' ';
 	    t.hold_mosaic = 0;
          } else {
             LOG("STC stop conceal\n");
