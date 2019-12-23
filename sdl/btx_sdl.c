@@ -24,29 +24,64 @@ void update_pixels(uint32_t pixels[], const int w, const int h)
 {
 	int sy=h/240; //Scale factor y
 	int sx=w/480; //scale factor x
+	int wx=sx*480;
+	int wy=sy*240;
+	int ox=(w-wx)/2;
+	int oy=(h-wy)/2;
 	int y; int x;
 	for (y=0; y<h; y++) 
 	for (x=0; x<w; x++) {
-		int mi_x=max(x/sx,479);
-		int mi_y=max(y/sy,239);
-		int mi_p=(mi_y*480+mi_x)*3;
 		int p=y*w+x;
 		int r=0;
 		int g=0;
 		int b=0;
-		if ( ((x/sx)%12==0) || ((y/sy)%10==0)) {
-			r=255;
-			g=255;
-			b=255;
-		}
-		if (memimage!=NULL) {
-			r=memimage[mi_p+0];
-			g=memimage[mi_p+1];
-			b=memimage[mi_p+2];
+		if ( (y<oy) || (y>=wy+oy) ) {
+			int c=(y-oy)/sy/10;
+			get_column_colour(c, &r, &g, &b);
+		} else 
+		if ( (x<ox) || (x>=wx+ox) ) {
+			int c=(y-oy)/sy/10;
+			get_column_colour(c, &r, &g, &b);
+		} else {
+			int mi_x=max((x-ox)/sx,479);
+			int mi_y=max((y-oy)/sy,239);
+			int mi_p=(mi_y*480+mi_x)*3;
+
+			if (memimage!=NULL) {
+				r=memimage[mi_p+0];
+				g=memimage[mi_p+1];
+				b=memimage[mi_p+2];
+			}
 		}
 		pixels[p]=(0xff<<24) | (r<<16) | (g<<8) | (b);
 	}
 }
+
+int imagenum=0;
+
+void write_image(const uint32_t pixels[], const int w, const int h)
+{
+	uint8_t opix[w*h*3];
+	int n;
+	for (n=0; n<h*w; n++) {
+		int r=(pixels[n])&0xff;
+		int g=(pixels[n]>>8)&0xff;
+		int b=(pixels[n]>>16)&0xff;
+		opix[n*3+0]=r;
+		opix[n*3+1]=g;
+		opix[n*3+2]=b;
+	}
+	char fn[256];
+	sprintf(fn, "%08d.pbm", imagenum);
+	imagenum=imagenum+1;
+	printf("Writing image %s\n", fn);
+	FILE *f=fopen(fn,"w");
+	sprintf(fn, "P6 %d %d 255\n", w, h);
+	fwrite(fn, strlen(fn), 1, f);
+	fwrite(opix, w*h*3, 1, f);
+	fclose(f);
+}
+
 
 void decoder_thread(void *x_void_ptr)
 {
@@ -208,8 +243,8 @@ int main(int argc, char ** argv)
 		return 1;
 	}
 
-	int width=480*2;
-	int height=240*3;
+	int width=480*2+240;
+	int height=240*3+120;
 
 	SDL_Init(SDL_INIT_VIDEO);
 
@@ -232,7 +267,7 @@ int main(int argc, char ** argv)
 		int eventtimeout=40;
 		if (draw!=0) eventtimeout=10;
 		SDL_Event event;
-		SDL_WaitEventTimeout(&event,250);
+		SDL_WaitEventTimeout(&event,eventtimeout);
 		switch (event.type)
 		{
 			case SDL_TEXTINPUT:
@@ -251,6 +286,7 @@ int main(int argc, char ** argv)
 			break;
 		}
 		update_pixels(pixels, width, height);
+		//write_image(pixels, width, height);
 		SDL_UpdateTexture(texture, NULL, pixels, width * sizeof(Uint32));
 		SDL_RenderClear(renderer);
 		SDL_RenderCopy(renderer, texture, NULL, NULL);

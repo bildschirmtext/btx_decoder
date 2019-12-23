@@ -48,13 +48,13 @@ struct btxchar {
                             /* 2: ydouble  */
                             /* 3: xydouble */
 
+unsigned char *memimage = NULL;
+
 typedef struct {
    unsigned char red;
    unsigned char green;
    unsigned char blue;
 } color;
-
-unsigned char *memimage = NULL;
 
 /* local variables */
 static struct btxchar btx_font[6*96];
@@ -339,4 +339,15 @@ void init_xfont()
    memimage = malloc(480*240*3);
    init_fonts();
    default_colors();
+}
+
+
+void get_column_colour(int column, int *r, int *g, int *b)
+{
+	int c=column;
+	if (c<0) c=0;
+	if (c>=24) c=23;
+	*r=colormap[32+4+c].red;
+	*g=colormap[32+4+c].green;
+	*b=colormap[32+4+c].blue;
 }

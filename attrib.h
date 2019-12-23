@@ -32,6 +32,8 @@
  *
  */
 
+#include <stdint.h>
+
 #define ATTR_UNDERLINE  0x00001
 #define ATTR_FLASH      0x00002
 #define ATTR_INVERTED   0x00008
@@ -75,4 +77,5 @@ struct screen_cell {
    unsigned char fg;
    unsigned char bg;
    unsigned int real;      /* really displayed attributes (size !) */
+   uint8_t blinkmode;	/* Bits 0-1:Mode; 2-3:Rate */
 };

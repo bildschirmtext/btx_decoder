@@ -1758,7 +1758,7 @@ static void scroll(int up)
 void LOG(const char *format, ...)
 {
    FILE *textlog = stderr;
-
+return;
    va_list args;
    va_start(args, format);
 
@@ -1779,3 +1779,5 @@ void xbtxerror(int perr, const char *format, ...)
    fprintf(stderr, "\n\n");
    exit(1);
 }
+
+
