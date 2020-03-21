@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <netdb.h>
+#include <stdint.h>
 
 /*
  * The original Bildschirmtext service over modem supported
@@ -12,9 +13,15 @@
  * code does not support receiving any.
  */
 
-int sockfd;
+int sockfd=-1;
 unsigned char last_char;
 int is_last_char_buffered = 0;
+
+#define BSIZE (1024*1024)
+
+uint8_t buffer[BSIZE];
+int rpointer=0;
+int wpointer=0;
 
 #define HOST "localhost"
 //#define HOST "belgradstr.dyndns.org"
@@ -51,16 +58,41 @@ void layer2_connect2(const char *host, const int port)
     }
 }
 
+
+int layer2_write_readbuffer(uint8_t c)
+{
+	int nwpointer=(wpointer+1)%BSIZE;
+	if (nwpointer==rpointer) return -1; //No space left in buffer
+	buffer[wpointer]=c;
+	wpointer=nwpointer;
+	return 0;
+}
+
+int layer2_eof()
+{
+	if (wpointer==rpointer) return 0;
+	return 1;
+}
+
 int layer2_getc()
 {
     if (is_last_char_buffered) {
         is_last_char_buffered = 0;
     } else {
-        ssize_t numbytes = recv(sockfd, &last_char, 1, 0);
-        if (numbytes == -1) {
-            perror("recv");
-            exit(1);
-        }
+	if (sockfd<0) {
+		if (rpointer==wpointer) {
+			return -1; //EOF or no data left
+		}
+		last_char=buffer[rpointer];
+		rpointer=(rpointer+1)%BSIZE;
+
+	} else {
+		ssize_t numbytes = recv(sockfd, &last_char, 1, 0);
+		if (numbytes == -1) {
+		    perror("recv");
+		    exit(1);
+		}
+	}
     }
     return last_char;
 }
@@ -72,8 +104,10 @@ void layer2_ungetc()
 
 void layer2_write(const unsigned char *s, unsigned int len)
 {
+	if (sockfd<0) return;
     if (send(sockfd, s, len, 0) == -1){
         perror("send");
         exit (1);
     }
 }
+
