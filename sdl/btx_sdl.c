@@ -264,8 +264,8 @@ int main(int argc, char ** argv)
 			dirty=0;
 			draw=1;
 		}
-		int eventtimeout=40;
-		if (draw!=0) eventtimeout=10;
+		int eventtimeout=80;
+		if (draw!=0) eventtimeout=40;
 		SDL_Event event;
 		SDL_WaitEventTimeout(&event,eventtimeout);
 		switch (event.type)

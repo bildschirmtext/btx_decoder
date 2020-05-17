@@ -6,6 +6,7 @@
 #include <pthread.h>
 #include "../xfont.h"
 #include "../layer2.h"
+#include "../attrib.h"
 #include "../layer6.h"
 
 
@@ -91,7 +92,6 @@ int main(int argc, char ** argv)
 	FILE *f=fopen(argv[1],"r");
 	uint8_t buf[1024*1024];
 	size_t s=fread(buf, 1, sizeof(buf), f);
-	printf("File %s size=%d\n", argv[1], s);
 	fclose(f);
 	int n;
 	for (n=0; n<s; n++) {
@@ -119,6 +119,9 @@ int main(int argc, char ** argv)
 
 
 	free(image);
+
+	for (n=25; n<38; n++) printf("%c", get_screen_character(n,0));
+	printf("\n");
 
 
 	return 0;
