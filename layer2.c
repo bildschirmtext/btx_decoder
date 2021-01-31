@@ -3,6 +3,8 @@
 #include <string.h>
 #include <netdb.h>
 #include <stdint.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
 
 /*
  * The original Bildschirmtext service over modem supported
