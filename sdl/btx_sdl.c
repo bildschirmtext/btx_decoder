@@ -64,9 +64,9 @@ void write_image(const uint32_t pixels[], const int w, const int h)
 	uint8_t opix[w*h*3];
 	int n;
 	for (n=0; n<h*w; n++) {
-		int r=(pixels[n])&0xff;
+		int b=(pixels[n])&0xff;
 		int g=(pixels[n]>>8)&0xff;
-		int b=(pixels[n]>>16)&0xff;
+		int r=(pixels[n]>>16)&0xff;
 		opix[n*3+0]=r;
 		opix[n*3+1]=g;
 		opix[n*3+2]=b;
@@ -243,8 +243,12 @@ int main(int argc, char ** argv)
 		return 1;
 	}
 
-	int width=480*2+240;
-	int height=240*3+120;
+	//for exporting images
+	//int width=832;
+	//int height=288;
+
+	int width=624*2;
+	int height=288*3;
 
 	SDL_Init(SDL_INIT_VIDEO);
 
@@ -264,8 +268,9 @@ int main(int argc, char ** argv)
 			dirty=0;
 			draw=1;
 		}
-		int eventtimeout=40;
-		if (draw!=0) eventtimeout=10;
+		int eventtimeout=80;
+		if (draw!=0) eventtimeout=80;
+		//eventtimeout=20; //for exporting images
 		SDL_Event event;
 		SDL_WaitEventTimeout(&event,eventtimeout);
 		switch (event.type)
@@ -286,7 +291,7 @@ int main(int argc, char ** argv)
 			break;
 		}
 		update_pixels(pixels, width, height);
-		//write_image(pixels, width, height);
+		//write_image(pixels, width, height); for exporting images
 		SDL_UpdateTexture(texture, NULL, pixels, width * sizeof(Uint32));
 		SDL_RenderClear(renderer);
 		SDL_RenderCopy(renderer, texture, NULL, NULL);
