@@ -1820,3 +1820,7 @@ void xbtxerror(int perr, const char *format, ...)
 }
 
 
+int get_screen_character(int x, int y)
+{
+	return screen[y][x].chr;
+}
