@@ -90,9 +90,9 @@ int layer2_getc()
 
 	} else {
 		ssize_t numbytes = recv(sockfd, &last_char, 1, 0);
-		if (numbytes == -1) {
-		    perror("recv");
-		    exit(1);
+		if (numbytes==0) usleep(100000);
+		if (numbytes <0) {
+		    return -1;
 		}
 	}
     }
