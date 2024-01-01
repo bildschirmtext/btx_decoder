@@ -1115,7 +1115,7 @@ static void do_DRCS_data(int c)
 	 byte = 0;
 	 if(planes == t.drcs_bits) {  /* DRC is complete */
 	    log_DRC(c, data, t.drcs_bits);
-	    define_raw_DRC(c, data, t.drcs_bits);
+	    define_raw_DRC(c, (char *)data, t.drcs_bits);
 	    planes = 0;
 	    c += t.drcs_step;
 	 }

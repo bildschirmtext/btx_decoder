@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <unistd.h>
 
 /*
  * The original Bildschirmtext service over modem supported
@@ -28,6 +29,8 @@ int wpointer=0;
 #define HOST "localhost"
 //#define HOST "belgradstr.dyndns.org"
 #define PORT 20000 /* XXX the original port for CEPT is 20005 */
+
+static void layer2_connect2(const char *host, const int port);
 
 void layer2_connect() 
 {
